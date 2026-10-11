@@ -1,0 +1,4 @@
+project_id = "uianbovauxagmzwxnwkp"
+
+[functions.save-guardian]
+verify_jwt = false
