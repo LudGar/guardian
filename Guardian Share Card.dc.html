@@ -11,14 +11,25 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
-body{margin:0;background:#08090b;color:#e8e9ec;-webkit-font-smoothing:antialiased;--fd:'Barlow Condensed';--fm:'JetBrains Mono'}
+body{margin:0;background:#0d0f12;color:#e8e9ec;-webkit-font-smoothing:antialiased;--fd:'Barlow Condensed';--fm:'JetBrains Mono'}
 body[data-font="space"]{--fd:'Space Grotesk';--fm:'Space Mono'}
-a{color:#e8e9ec}a:hover{color:oklch(0.82 0.13 85)}
+a{color:#e8e9ec;text-decoration:none}a:hover{color:oklch(0.82 0.13 85)}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
 <script src="./guardian.js"></script>
 </helmet>
-<div ref="{{ stageRef }}" style="width:1320px;height:750px;display:flex;align-items:center;justify-content:center;perspective:1600px;background:radial-gradient(ellipse at 50% 40%,#16191e 0%,#08090b 70%);--rx:0deg;--ry:0deg;--px:50%;--py:50%;--holo:0.55;">
+<div style="min-height:100vh;background:#0d0f12;display:flex;flex-direction:column;align-items:safe center;">
+<header style="box-sizing:border-box;width:100%;max-width:1200px;padding:28px 32px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;">
+  <a href="./Guardian Search.dc.html" style="font-family:var(--fm),monospace;font-size:12px;letter-spacing:.14em;color:#8a8f98;text-transform:uppercase;text-decoration:none;">← Search{{ platformLine }}</a>
+  <nav style="display:flex;gap:24px;flex-wrap:wrap;align-items:center;font-family:var(--fd),sans-serif;font-size:15px;letter-spacing:.1em;text-transform:uppercase;">
+    <a href="{{ profileHref }}" style="text-decoration:none;">Profile</a>
+    <sc-if value="{{ canEdit }}" hint-placeholder-val="{{ false }}"><a href="{{ editHref }}" style="text-decoration:none;">Edit plaques</a></sc-if>
+    <sc-if value="{{ showSignIn }}" hint-placeholder-val="{{ false }}"><button onClick="{{ signIn }}" style="font:inherit;letter-spacing:inherit;text-transform:inherit;background:none;border:0;padding:0;color:#e8e9ec;cursor:pointer;" style-hover="color:oklch(0.82 0.13 85);">Sign in</button></sc-if>
+    <a href="{{ raidUrl }}" target="_blank" style="text-decoration:none;">Raid Report ↗</a>
+    <a href="{{ dungeonUrl }}" target="_blank" style="text-decoration:none;">Dungeon Report ↗</a>
+  </nav>
+</header>
+<div ref="{{ stageRef }}" style="flex:none;width:1480px;height:880px;display:flex;align-items:center;justify-content:center;perspective:1800px;background:#0d0f12;--rx:0deg;--ry:0deg;--px:50%;--py:50%;--holo:0.55;">
   <div style="width:1200px;height:630px;position:relative;border-radius:28px;transform-style:preserve-3d;transform:rotateX(var(--rx)) rotateY(var(--ry));transition:transform .08s linear;box-shadow:0 40px 80px -20px rgba(0,0,0,.8),0 0 0 1px rgba(255,255,255,.04);background:{{ tier.frame }};padding:14px;box-sizing:border-box;">
     <div style="position:relative;width:100%;height:100%;border-radius:18px;overflow:hidden;background:#0d0f12;display:grid;grid-template-rows:1fr auto auto auto;">
 
@@ -89,8 +100,9 @@ a{color:#e8e9ec}a:hover{color:oklch(0.82 0.13 85)}
   </div>
   <sc-if value="{{ hasPlayerRaw }}" hint-placeholder-val="{{ false }}"><div style="display:none;"><dc-import name="Guardian Landing" font="{{ font }}" player="{{ playerRaw }}" hint-size="0,0"></dc-import></div></sc-if>
 </div>
+</div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1320,&quot;height&quot;:750},&quot;player&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;holo&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;min&quot;:0,&quot;max&quot;:1,&quot;step&quot;:0.05,&quot;default&quot;:0.55,&quot;tsType&quot;:&quot;number&quot;},&quot;tilt&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;min&quot;:0,&quot;max&quot;:20,&quot;step&quot;:1,&quot;default&quot;:10,&quot;unit&quot;:&quot;°&quot;,&quot;tsType&quot;:&quot;number&quot;},&quot;idle&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;},&quot;tierPreview&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;auto&quot;,&quot;C&quot;,&quot;R&quot;,&quot;SR&quot;,&quot;UR&quot;,&quot;SPR&quot;],&quot;default&quot;:&quot;auto&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;font&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;barlow&quot;,&quot;space&quot;],&quot;default&quot;:&quot;space&quot;,&quot;tsType&quot;:&quot;'barlow'|'space'&quot;}}">
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1480,&quot;height&quot;:990},&quot;player&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;holo&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;min&quot;:0,&quot;max&quot;:1,&quot;step&quot;:0.05,&quot;default&quot;:0.55,&quot;tsType&quot;:&quot;number&quot;},&quot;tilt&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;min&quot;:0,&quot;max&quot;:20,&quot;step&quot;:1,&quot;default&quot;:10,&quot;unit&quot;:&quot;°&quot;,&quot;tsType&quot;:&quot;number&quot;},&quot;idle&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;},&quot;tierPreview&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;auto&quot;,&quot;C&quot;,&quot;R&quot;,&quot;SR&quot;,&quot;UR&quot;,&quot;SPR&quot;],&quot;default&quot;:&quot;auto&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;font&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;barlow&quot;,&quot;space&quot;],&quot;default&quot;:&quot;space&quot;,&quot;tsType&quot;:&quot;'barlow'|'space'&quot;}}">
 class Component extends DCLogic {
   stageRef = React.createRef();
   tipRef = React.createRef();
@@ -124,7 +136,8 @@ class Component extends DCLogic {
     const wait = async () => {
       if (!window.GL) return setTimeout(wait, 50);
       try { this.P = await GL.resolve(GL.parse(this.props.player)); } catch (e) { this.P = null; }
-      this.setState({ player: this.P, noPlayer: !this.P, playerRaw: this.P ? this.P.type + '-' + this.P.id : '' });
+      await GL.ready;
+      this.setState({ player: this.P, noPlayer: !this.P, playerRaw: this.P ? this.P.type + '-' + this.P.id : '', auth: GL.auth() });
       this.reload();
     };
     wait();
@@ -194,6 +207,14 @@ class Component extends DCLogic {
       emblemBg: c && c.emblem ? `#15181c url('https://www.bungie.net${c.emblem}') left center / cover no-repeat` : '#15181c',
       raidShort: ((c && c.raidUrl) || '').replace('https://', ''),
       playerRaw: this.state.playerRaw || '',
+      platformLine: this.P && window.GL ? ' · ' + ((GL.PLAT[this.P.type] || {}).label || 'Bungie') + (c && c.code ? ' · ' + c.name + '#' + c.code : '') : '',
+      profileHref: this.P && window.GL ? GL.landing(this.P) : './Guardian Search.dc.html',
+      editHref: './Profile Data Editor.dc.html' + (this.P && window.GL ? GL.qs(this.P) : ''),
+      canEdit: !!(this.P && window.GL && this.state.auth && GL.isOwner(this.P)),
+      showSignIn: !!(this.P && window.GL && !this.state.auth && GL.canLogin()),
+      signIn: () => window.GL && GL.login(location.href),
+      raidUrl: window.GL ? GL.reportUrl('raid', this.P) : '#',
+      dungeonUrl: window.GL ? GL.reportUrl('dungeon', this.P) : '#',
       serial: c && c.serial ? String(c.serial.no).padStart(3, '0') + '/' + String(c.serial.total).padStart(3, '0') : '—/—',
       serialTip: c && c.serial ? 'Card No. ' + c.serial.no.toLocaleString('en-US') + '\n' + c.serial.total.toLocaleString('en-US') + ' Guardians looked up so far\nNumber = order of first lookup' : 'Card number\nAssigned on first lookup',
       hasPlayerRaw: !!this.state.playerRaw,
