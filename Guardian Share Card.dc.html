@@ -196,7 +196,10 @@ class Component extends DCLogic {
     this.setState({ emStatus: 'Loading collections…' });
     try {
       const prof = await GL.api(`/Destiny2/${this.P.type}/Profile/${this.P.id}/?components=800`);
-      const owned = (prof.profileCollectibles && prof.profileCollectibles.data && prof.profileCollectibles.data.collectibles) || {};
+      const owned = { ...((prof.profileCollectibles && prof.profileCollectibles.data && prof.profileCollectibles.data.collectibles) || {}) };
+      Object.values((prof.characterCollectibles && prof.characterCollectibles.data) || {}).forEach(ch => {
+        Object.entries(ch.collectibles || {}).forEach(([k, v]) => { if (!owned[k] || (owned[k].state & 1)) owned[k] = v; });
+      });
       const man = await GL.api('/Destiny2/Manifest/');
       const paths = man.jsonWorldComponentContentPaths.en;
       this.setState({ emStatus: 'Loading emblem list…' });
@@ -337,7 +340,7 @@ class Component extends DCLogic {
       emFilter: this.state.emFilter,
       setEmFilter: e => this.setState({ emFilter: e.target.value }),
       charEmblems: ((c && c.charEmblems) || []).map(x => ({ label: x.label, bg: `#15181c url('https://www.bungie.net${x.path}') left center / cover no-repeat`, border: x.path === curEmblem ? 'oklch(0.82 0.13 85)' : '#2a2f37', pick: () => this.pickEmblem(x.path, x.label) })),
-      collEmblems: (this.state.coll || []).filter(x => !this.state.emFilter || x.name.toLowerCase().includes(this.state.emFilter.toLowerCase())).slice(0, 240).map(x => ({ name: x.name, bg: `#15181c url('https://www.bungie.net${x.icon}') center / cover no-repeat`, border: '#2a2f37', pick: () => this.pickCollectible(x) })),
+      collEmblems: (this.state.coll || []).filter(x => !this.state.emFilter || x.name.toLowerCase().includes(this.state.emFilter.toLowerCase())).map(x => ({ name: x.name, bg: `#15181c url('https://www.bungie.net${x.icon}') center / cover no-repeat`, border: '#2a2f37', pick: () => this.pickCollectible(x) })),
       headerStats: [
         c && c.gr != null ? { value: String(c.gr), label: 'Guardian rank' } : null,
         c && c.commend ? { value: Number(c.commend.total).toLocaleString('en-US'), label: 'Commendations' } : null,
