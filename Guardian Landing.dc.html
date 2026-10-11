@@ -457,7 +457,8 @@ class Component extends DCLogic {
     if (pl && G && L) {
       try {
         localStorage.setItem(G.k(pl.id, 'card'), JSON.stringify({
-          name: L.name, code: L.code, emblem: emblemPath, raidUrl, serial: this.state.serial || null,
+          name: L.name, code: L.code, emblem: P.cardEmblem || emblemPath, raidUrl,
+          charEmblems: L.chars.map(ch => ({ label: ['Titan', 'Hunter', 'Warlock'][ch.classType] + ' · ✦' + ch.light, path: ch.emblemBackgroundPath })), serial: this.state.serial || null,
           raidClears: sum(raids, 1), dungeonClears: sum(dungeons, 1), fullRaidClears: P.fullRaidClears ?? null, sherpas: sherpaTotal,
           power, triumph: L.triumph ?? null, commend: L.commend ?? null, gr: L.gr ?? null,
           acts: { raids: raids.map(r => [r[0], r[1], r[2]]), dungeons: dungeons.map(r => [r[0], r[1], r[2]]), missions: missions.map(r => [r[0], r[1], r[2]]) }

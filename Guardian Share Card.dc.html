@@ -94,12 +94,48 @@ a{color:#e8e9ec;text-decoration:none}a:hover{color:oklch(0.82 0.13 85)}
       <div style="position:absolute;inset:0;pointer-events:none;mix-blend-mode:soft-light;background:radial-gradient(circle at var(--px) var(--py),rgba(255,255,255,.55) 0%,rgba(255,255,255,.12) 25%,transparent 55%);"></div>
     </div>
   </div>
+</div>
+<sc-if value="{{ canEdit }}" hint-placeholder-val="{{ false }}">
+  <section style="box-sizing:border-box;width:100%;max-width:1200px;padding:8px 32px 72px;display:flex;flex-direction:column;gap:16px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;">
+      <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;">
+        <span style="font-family:var(--fd),sans-serif;font-weight:600;font-size:24px;letter-spacing:.04em;text-transform:uppercase;">Card emblem</span>
+        <div style="display:flex;border:1px solid #2a2f37;">
+          <sc-for list="{{ emTabs }}" as="tb" hint-placeholder-count="2">
+            <button onClick="{{ tb.select }}" style="font-family:var(--fd),sans-serif;font-weight:600;font-size:13px;letter-spacing:.14em;text-transform:uppercase;padding:8px 16px;border:0;cursor:pointer;background:{{ tb.bg }};color:{{ tb.color }};">{{ tb.label }}</button>
+          </sc-for>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <sc-if value="{{ isColl }}" hint-placeholder-val="{{ false }}">
+          <input value="{{ emFilter }}" onChange="{{ setEmFilter }}" placeholder="Filter emblems" style="font-family:var(--fm),monospace;font-size:13px;color:#e8e9ec;background:#111418;border:1px solid #2a2f37;padding:8px 10px;outline:none;width:200px;">
+        </sc-if>
+        <span style="font-family:var(--fm),monospace;font-size:12px;color:#8a8f98;">{{ emStatus }}</span>
+      </div>
+    </div>
+    <sc-if value="{{ isChars }}" hint-placeholder-val="{{ true }}">
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;">
+        <sc-for list="{{ charEmblems }}" as="ce" hint-placeholder-count="3">
+          <button onClick="{{ ce.pick }}" style="height:64px;border:2px solid {{ ce.border }};border-radius:6px;cursor:pointer;background:{{ ce.bg }};display:flex;align-items:center;justify-content:flex-end;padding:0 14px;">
+            <span style="font-family:var(--fd),sans-serif;font-weight:600;font-size:16px;letter-spacing:.06em;text-transform:uppercase;color:#e8e9ec;text-shadow:0 1px 4px rgba(0,0,0,.9);">{{ ce.label }}</span>
+          </button>
+        </sc-for>
+      </div>
+    </sc-if>
+    <sc-if value="{{ isColl }}" hint-placeholder-val="{{ false }}">
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(56px,1fr));gap:8px;max-height:360px;overflow:auto;padding-right:4px;">
+        <sc-for list="{{ collEmblems }}" as="ee" hint-placeholder-count="24">
+          <button onClick="{{ ee.pick }}" data-tip="{{ ee.name }}" style="aspect-ratio:1;border:2px solid {{ ee.border }};border-radius:4px;cursor:pointer;background:{{ ee.bg }};padding:0;"></button>
+        </sc-for>
+      </div>
+    </sc-if>
+  </section>
+</sc-if>
   <div ref="{{ tipRef }}" style="position:fixed;left:0;top:0;z-index:10;pointer-events:none;opacity:0;transition:opacity .08s;max-width:340px;background:#0d0f12;border:1px solid oklch(0.72 0.11 80);border-radius:6px;padding:10px 14px;box-shadow:0 10px 30px rgba(0,0,0,.6);display:flex;flex-direction:column;gap:6px;">
     <span data-tip-title="1" style="font-family:var(--fd),sans-serif;font-weight:700;font-size:15px;letter-spacing:.12em;text-transform:uppercase;color:oklch(0.86 0.12 85);"></span>
     <span data-tip-body="1" style="font-family:var(--fm),monospace;font-size:12px;line-height:1.6;color:#c9ccd2;white-space:pre-line;"></span>
   </div>
   <sc-if value="{{ hasPlayerRaw }}" hint-placeholder-val="{{ false }}"><div style="display:none;"><dc-import name="Guardian Landing" font="{{ font }}" player="{{ playerRaw }}" hint-size="0,0"></dc-import></div></sc-if>
-</div>
 </div>
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1480,&quot;height&quot;:990},&quot;player&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;holo&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;min&quot;:0,&quot;max&quot;:1,&quot;step&quot;:0.05,&quot;default&quot;:0.55,&quot;tsType&quot;:&quot;number&quot;},&quot;tilt&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;min&quot;:0,&quot;max&quot;:20,&quot;step&quot;:1,&quot;default&quot;:10,&quot;unit&quot;:&quot;°&quot;,&quot;tsType&quot;:&quot;number&quot;},&quot;idle&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;},&quot;tierPreview&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;auto&quot;,&quot;C&quot;,&quot;R&quot;,&quot;SR&quot;,&quot;UR&quot;,&quot;SPR&quot;],&quot;default&quot;:&quot;auto&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;font&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;barlow&quot;,&quot;space&quot;],&quot;default&quot;:&quot;space&quot;,&quot;tsType&quot;:&quot;'barlow'|'space'&quot;}}">
@@ -119,7 +155,51 @@ class Component extends DCLogic {
     tip.style.transform = `translate(${x}px,${y}px)`;
     tip.style.opacity = '1';
   }
-  state = { card: null };
+  state = { card: null, emTab: 'chars', emFilter: '', coll: null, emStatus: '' };
+  async loadCollections() {
+    if (this.collLoading || !this.P) return;
+    this.collLoading = true;
+    this.setState({ emStatus: 'Loading collections…' });
+    try {
+      const prof = await GL.api(`/Destiny2/${this.P.type}/Profile/${this.P.id}/?components=800`);
+      const owned = (prof.profileCollectibles && prof.profileCollectibles.data && prof.profileCollectibles.data.collectibles) || {};
+      const man = await GL.api('/Destiny2/Manifest/');
+      const paths = man.jsonWorldComponentContentPaths.en;
+      this.setState({ emStatus: 'Loading emblem list…' });
+      const [nodes, colls] = await Promise.all([
+        fetch('https://www.bungie.net' + paths.DestinyPresentationNodeDefinition).then(r => r.json()),
+        fetch('https://www.bungie.net' + paths.DestinyCollectibleDefinition).then(r => r.json())
+      ]);
+      const out = [], seen = new Set();
+      const walk = hh => { const n = nodes[hh]; if (!n || seen.has(hh)) return; seen.add(hh);
+        (n.children.collectibles || []).forEach(c => { const d = colls[c.collectibleHash]; const st = owned[c.collectibleHash]; if (d && st && (st.state & 1) === 0) out.push({ hash: c.collectibleHash, item: d.itemHash, name: d.displayProperties.name, icon: d.displayProperties.icon }); });
+        (n.children.presentationNodes || []).forEach(c => walk(c.presentationNodeHash)); };
+      Object.entries(nodes).filter(([, n]) => n.displayProperties && n.displayProperties.name === 'Emblems').forEach(([hh]) => walk(+hh));
+      const uniq = [...new Map(out.map(x => [x.item, x])).values()].sort((a, b) => a.name.localeCompare(b.name));
+      this.setState({ coll: uniq, emStatus: uniq.length + ' emblems' });
+    } catch (e) { this.collLoading = false; this.setState({ emStatus: 'Collections unavailable (' + e.message + ')' }); }
+  }
+  async pickEmblem(path, label) {
+    if (!path || !this.P) return;
+    this.setState({ emblemOverride: path, emStatus: 'Saving…' });
+    try {
+      const id = this.P.id;
+      let d = await GL.loadEdits(id);
+      if (!d) { try { d = JSON.parse(localStorage.getItem(GL.k(id, 'profile'))); } catch (e) {} }
+      if (!d) { const base = await fetch('./profile.json').then(r => r.json()); d = id === GL.OWNER ? base : GL.blank(base); }
+      d.profile = { ...(d.profile || {}), cardEmblem: path };
+      localStorage.setItem(GL.k(id, 'profile'), JSON.stringify(d));
+      const shared = await GL.saveEdits(id, d);
+      this.setState({ emStatus: (label ? label + ' · ' : '') + (shared ? 'saved for everyone' : 'saved in this browser') });
+    } catch (e) { this.setState({ emStatus: e.message }); }
+  }
+  async pickCollectible(ee) {
+    this.setState({ emStatus: 'Loading ' + ee.name + '…' });
+    const d = await GL.api(`/Destiny2/Manifest/DestinyInventoryItemDefinition/${ee.item}/`).catch(() => null);
+    const path = d && (d.secondaryIcon || d.secondarySpecial);
+    if (!path) return this.setState({ emStatus: 'No banner art for ' + ee.name });
+    this.pickEmblem(path, ee.name);
+  }
   applyFont() { document.body.dataset.font = this.props.font ?? 'space'; }
   setVars(x, y) {
     const el = this.stageRef.current; if (!el) return;
@@ -165,6 +245,7 @@ class Component extends DCLogic {
     const short = n => n.replace(/^The /, '').replace('Vault of Glass', 'VoG').replace('Pit of Heresy', 'Pit').replace('Garden of Salvation', 'GoS').replace('Deep Stone Crypt', 'DSC').replace('Vow of the Disciple', 'VotD');
     const rank = t => /Solo Flawless/.test(t) ? 0 : /Flawless (Duo|Trio)/.test(t) ? 1 : /Flawless/.test(t) ? 2 : /Solo/.test(t) ? 3 : 4;
     const tags = c && c.tags && c.tags.length ? c.tags.slice().sort((a, b) => rank(a[1]) - rank(b[1])).slice(0, 8).map(([n, t]) => short(n) + ' ' + t) : fallbackTags;
+    const curEmblem = this.state.emblemOverride || (c && c.emblem) || '';
     const tier = (() => {
       const A = (c && c.acts) || { raids: [], dungeons: [], missions: [] };
       const all = [...A.raids, ...A.dungeons, ...A.missions];
@@ -204,7 +285,7 @@ class Component extends DCLogic {
       font: this.props.font ?? 'space',
       power: (c && c.power) || '✦—',
       displayName: c && c.name ? c.name : this.state.noPlayer ? 'Find a Guardian' : 'Loading…',
-      emblemBg: c && c.emblem ? `#15181c url('https://www.bungie.net${c.emblem}') left center / cover no-repeat` : '#15181c',
+      emblemBg: curEmblem ? `#15181c url('https://www.bungie.net${curEmblem}') left center / cover no-repeat` : '#15181c',
       raidShort: ((c && c.raidUrl) || '').replace('https://', ''),
       playerRaw: this.state.playerRaw || '',
       platformLine: this.P && window.GL ? ' · ' + ((GL.PLAT[this.P.type] || {}).label || 'Bungie') + (c && c.code ? ' · ' + c.name + '#' + c.code : '') : '',
@@ -218,6 +299,14 @@ class Component extends DCLogic {
       serial: c && c.serial ? String(c.serial.no).padStart(3, '0') + '/' + String(c.serial.total).padStart(3, '0') : '—/—',
       serialTip: c && c.serial ? 'Card No. ' + c.serial.no.toLocaleString('en-US') + '\n' + c.serial.total.toLocaleString('en-US') + ' Guardians looked up so far\nNumber = order of first lookup' : 'Card number\nAssigned on first lookup',
       hasPlayerRaw: !!this.state.playerRaw,
+      emTabs: [['chars', 'Characters'], ['coll', 'Collections']].map(([k, label]) => ({ label, bg: this.state.emTab === k ? 'oklch(0.82 0.13 85)' : 'transparent', color: this.state.emTab === k ? '#0d0f12' : '#8a8f98', select: () => { this.setState({ emTab: k }); if (k === 'coll' && !this.state.coll) this.loadCollections(); } })),
+      isChars: this.state.emTab === 'chars',
+      isColl: this.state.emTab === 'coll',
+      emStatus: this.state.emStatus,
+      emFilter: this.state.emFilter,
+      setEmFilter: e => this.setState({ emFilter: e.target.value }),
+      charEmblems: ((c && c.charEmblems) || []).map(x => ({ label: x.label, bg: `#15181c url('https://www.bungie.net${x.path}') left center / cover no-repeat`, border: x.path === curEmblem ? 'oklch(0.82 0.13 85)' : '#2a2f37', pick: () => this.pickEmblem(x.path, x.label) })),
+      collEmblems: (this.state.coll || []).filter(x => !this.state.emFilter || x.name.toLowerCase().includes(this.state.emFilter.toLowerCase())).slice(0, 240).map(x => ({ name: x.name, bg: `#15181c url('https://www.bungie.net${x.icon}') center / cover no-repeat`, border: '#2a2f37', pick: () => this.pickCollectible(x) })),
       headerStats: [
         c && c.gr != null ? { value: String(c.gr), label: 'Guardian rank' } : null,
         c && c.commend ? { value: Number(c.commend.total).toLocaleString('en-US'), label: 'Commendations' } : null,
