@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Destiny Director Prototype</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <div id="app">
+    <header class="topbar">
+      <div class="brand" id="brandBtn" title="Back to Director">
+        <span class="brandMark">◈</span>
+        <span class="brandText">DIRECTOR</span>
+      </div>
+
+      <div class="crumbs" id="crumbs"></div>
+
+      <div class="topbarRight">
+</div>
+    </header>
+
+    <main class="main">
+      <section class="stage" id="stage"></section>
+    </main>
+
+    <div id="tooltip" class="tooltip" hidden></div>
+  </div>
+
+  <script type="module" src="./app.js"></script>
+
+  <script>
+    const s = document.createElement("script");
+    s.type = "module";
+    document.head.appendChild(s);
+  </script>
+</body>
+</html>
