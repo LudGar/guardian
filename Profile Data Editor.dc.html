@@ -21,7 +21,7 @@ a{color:#e8e9ec;text-decoration:none}a:hover{color:oklch(0.82 0.13 85)}
     <div style="display:flex;flex-direction:column;gap:6px;">
       <a href="{{ backHref }}" style="font-family:'Space Mono',monospace;font-size:12px;color:#8a8f98;">← Back to {{ who }}</a>
       <h1 style="margin:0;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:44px;text-transform:uppercase;">Edit plaques</h1>
-      <p style="margin:0;font-size:14px;color:#8a8f98;max-width:560px;">Clears, characters and timelines are live. Add your full raid clears and any plaques the live check missed.</p>
+      <p style="margin:0;font-size:14px;color:#8a8f98;max-width:560px;">Clears, characters and timelines are live.</p>
     </div>
     <sc-if value="{{ canEdit }}" hint-placeholder-val="{{ false }}">
     <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
@@ -54,12 +54,12 @@ a{color:#e8e9ec;text-decoration:none}a:hover{color:oklch(0.82 0.13 85)}
   </sc-if>
 
   <sc-if value="{{ canEdit }}" hint-placeholder-val="{{ false }}">
+    <p style="margin:0;padding:16px 20px;border:1px solid #2a2f37;background:#111418;font-size:14px;line-height:1.6;color:#a9aeb6;text-wrap:pretty;">Bungie doesn't mark full vs. checkpoint runs or every lowman and flawless clear. Enter your full raid clears and plaques as shown on <a href="{{ raidUrl }}" target="_blank" style="color:oklch(0.82 0.13 85);">raid.report</a> and <a href="{{ dungeonUrl }}" target="_blank" style="color:oklch(0.82 0.13 85);">dungeon.report</a>. Plaques you add here show on your profile and card but don't count toward your tier score.</p>
     <section style="display:flex;flex-direction:column;gap:8px;">
       <h2 style="margin:0 0 8px;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:26px;text-transform:uppercase;letter-spacing:.04em;">Share card</h2>
-      <label style="display:grid;grid-template-columns:minmax(160px,220px) 160px minmax(0,1fr);gap:16px;align-items:center;padding:10px 0;border-top:1px solid #22262d;">
+      <label style="display:grid;grid-template-columns:minmax(160px,220px) 160px;gap:16px;align-items:center;padding:10px 0;border-top:1px solid #22262d;">
         <span style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:16px;text-transform:uppercase;">Full raid clears</span>
         <input type="number" value="{{ fullRaidClears }}" onChange="{{ setFull }}" style="font-family:'Space Mono',monospace;font-size:15px;color:#e8e9ec;background:#0d0f12;border:1px solid #2a2f37;padding:8px 10px;width:100%;box-sizing:border-box;">
-        <span style="font-size:13px;color:#6b717b;">Copy from raid.report. Bungie doesn't mark full vs checkpoint runs.</span>
       </label>
     </section>
   </sc-if>
@@ -71,7 +71,7 @@ a{color:#e8e9ec;text-decoration:none}a:hover{color:oklch(0.82 0.13 85)}
         <div style="display:grid;grid-template-columns:minmax(160px,220px) minmax(0,1fr);gap:16px;align-items:center;padding:10px 0;border-top:1px solid #22262d;">
           <span style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:16px;text-transform:uppercase;">{{ r.name }}</span>
           <div style="display:flex;gap:6px;flex-wrap:wrap;">
-            <sc-for list="{{ r.opts }}" as="o" hint-placeholder-count="3">
+            <sc-for list="{{ r.opts }}" as="o" hint-placeholder-count="9">
               <button onClick="{{ o.toggle }}" style="font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:6px 10px;cursor:pointer;border:1px solid {{ o.border }};background:{{ o.bg }};color:{{ o.color }};">{{ o.label }}</button>
             </sc-for>
           </div>
@@ -84,7 +84,7 @@ a{color:#e8e9ec;text-decoration:none}a:hover{color:oklch(0.82 0.13 85)}
 <script type="text/x-dc" data-dc-script data-props="{&quot;player&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
 class Component extends DCLogic {
   state = { data: null, status: '', dirty: false };
-  OPTS = { raids: ['Trio', 'Flawless', 'Flawless Trio'], dungeons: ['Solo', 'Flawless', 'Solo Flawless'], missions: ['Solo', 'Flawless', 'Solo Flawless'] };
+  OPTS = ['Trio', 'Duo', 'Solo', 'Flawless', 'Flawless Trio', 'Flawless Duo', 'Solo Flawless', 'Day One', 'Week One'];
   withBase(d) {
     const b = this.base;
     if (!d || !b) return d;
@@ -133,7 +133,7 @@ class Component extends DCLogic {
       title,
       rows: d[key].map((r, i) => ({
         name: r[0],
-        opts: this.OPTS[key].map(label => {
+        opts: this.OPTS.map(label => {
           const on = r[2].includes(label);
           return { label, bg: on ? gold : 'transparent', color: on ? '#0d0f12' : '#8a8f98', border: on ? gold : '#2a2f37',
             toggle: () => this.update(x => { const t = x[key][i][2]; const j = t.indexOf(label); if (j >= 0) t.splice(j, 1); else t.push(label); }) };
@@ -148,6 +148,8 @@ class Component extends DCLogic {
       meName: this.state.auth ? this.state.auth.name : '',
       meHref: this.state.auth && this.state.auth.me && window.GL ? GL.landing(this.state.auth.me) : './Guardian Search.dc.html',
       signIn: () => GL.login(location.href),
+      raidUrl: window.GL && this.P ? GL.reportUrl('raid', this.P) : 'https://raid.report',
+      dungeonUrl: window.GL && this.P ? GL.reportUrl('dungeon', this.P) : 'https://dungeon.report',
       who: this.state.noPlayer ? 'search' : 'profile',
       backHref: this.state.noPlayer ? './Guardian Search.dc.html' : './Guardian Landing.dc.html' + q,
       status: this.state.status,

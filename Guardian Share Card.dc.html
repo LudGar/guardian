@@ -248,15 +248,9 @@ class Component extends DCLogic {
     const curEmblem = this.state.emblemOverride || (c && c.emblem) || '';
     const tier = (() => {
       const A = (c && c.acts) || { raids: [], dungeons: [], missions: [] };
-      const all = [...A.raids, ...A.dungeons, ...A.missions];
-      const cnt = re => all.filter(r => r[2].some(t => re.test(t))).length;
-      const flaw = cnt(/Flawless/), low = cnt(/Trio|Duo|Solo/), flawLow = cnt(/Flawless (Trio|Duo)|Solo Flawless/);
       const parts = [
         ['Raid clears', c ? c.raidClears : 0, 0.6],
         ['Dungeon clears', c ? c.dungeonClears : 0, 0.4],
-        ['Flawless', flaw, 40],
-        ['Lowman', low, 30],
-        ['Flawless lowman', flawLow, 60],
         ['Triumph score', c && c.triumph ? c.triumph / 1000 : 0, 1],
         ['Guardian rank', c && c.gr ? c.gr : 0, 50],
         ['Commendations', c && c.commend ? c.commend.total : 0, 0.1]
@@ -264,15 +258,15 @@ class Component extends DCLogic {
       const score = Math.round(parts.reduce((s, [, v, w]) => s + v * w, 0));
       const T = [
         { code: 'C', name: 'Common', min: 0, holo: 0.25, frame: 'linear-gradient(135deg,#9aa0a8 0%,#5d636b 30%,#c4c8cd 52%,#585e66 76%,#a3a8af 100%)', badge: '#b4b9c0', text: '#b4b9c0' },
-        { code: 'R', name: 'Rare', min: 800, holo: 0.45, frame: 'linear-gradient(135deg,oklch(0.75 0.12 245) 0%,oklch(0.48 0.13 255) 25%,oklch(0.85 0.08 230) 50%,oklch(0.45 0.12 255) 75%,oklch(0.72 0.12 245) 100%)', badge: 'oklch(0.75 0.12 245)', text: 'oklch(0.78 0.11 245)' },
-        { code: 'SR', name: 'Super Rare', min: 1600, holo: 0.75, frame: 'linear-gradient(135deg,oklch(0.86 0.12 85) 0%,oklch(0.62 0.11 70) 22%,oklch(0.9 0.08 90) 48%,oklch(0.58 0.1 65) 74%,oklch(0.84 0.12 85) 100%)', badge: 'oklch(0.82 0.13 85)', text: 'oklch(0.82 0.13 85)' },
-        { code: 'UR', name: 'Ultra Rare', min: 2600, holo: 1, frame: 'linear-gradient(135deg,oklch(0.75 0.17 330) 0%,oklch(0.45 0.16 300) 25%,oklch(0.85 0.1 340) 50%,oklch(0.42 0.15 295) 75%,oklch(0.72 0.17 325) 100%)', badge: 'oklch(0.75 0.17 330)', text: 'oklch(0.8 0.14 330)' },
-        { code: 'SPR', name: 'Special Rare', min: 3600, holo: 1.3, frame: 'conic-gradient(from 200deg,#ff6fb5,#ffd36f,#7dffb0,#6fd8ff,#b48cff,#ff6fb5)', badge: 'linear-gradient(90deg,#ff6fb5,#ffd36f,#7dffb0,#6fd8ff,#b48cff)', text: '#ffd36f' }
+        { code: 'R', name: 'Rare', min: 600, holo: 0.45, frame: 'linear-gradient(135deg,oklch(0.75 0.12 245) 0%,oklch(0.48 0.13 255) 25%,oklch(0.85 0.08 230) 50%,oklch(0.45 0.12 255) 75%,oklch(0.72 0.12 245) 100%)', badge: 'oklch(0.75 0.12 245)', text: 'oklch(0.78 0.11 245)' },
+        { code: 'SR', name: 'Super Rare', min: 1200, holo: 0.75, frame: 'linear-gradient(135deg,oklch(0.86 0.12 85) 0%,oklch(0.62 0.11 70) 22%,oklch(0.9 0.08 90) 48%,oklch(0.58 0.1 65) 74%,oklch(0.84 0.12 85) 100%)', badge: 'oklch(0.82 0.13 85)', text: 'oklch(0.82 0.13 85)' },
+        { code: 'UR', name: 'Ultra Rare', min: 1900, holo: 1, frame: 'linear-gradient(135deg,oklch(0.75 0.17 330) 0%,oklch(0.45 0.16 300) 25%,oklch(0.85 0.1 340) 50%,oklch(0.42 0.15 295) 75%,oklch(0.72 0.17 325) 100%)', badge: 'oklch(0.75 0.17 330)', text: 'oklch(0.8 0.14 330)' },
+        { code: 'SPR', name: 'Special Rare', min: 2700, holo: 1.3, frame: 'conic-gradient(from 200deg,#ff6fb5,#ffd36f,#7dffb0,#6fd8ff,#b48cff,#ff6fb5)', badge: 'linear-gradient(90deg,#ff6fb5,#ffd36f,#7dffb0,#6fd8ff,#b48cff)', text: '#ffd36f' }
       ];
       const forced = this.props.tierPreview && this.props.tierPreview !== 'auto' ? T.find(t => t.code === this.props.tierPreview) : null;
       const t = forced || T.slice().reverse().find(x => score >= x.min);
       this.tierHolo = t.holo;
-      return { ...t, score: score.toLocaleString('en-US'), breakdown: t.name + ' · ' + score.toLocaleString('en-US') + ' pts\n' + parts.map(([n, v, w]) => n + '  +' + Math.round(v * w).toLocaleString('en-US')).join('\n') + '\n\nR 800 · SR 1,600 · UR 2,600 · SPR 3,600' };
+      return { ...t, score: score.toLocaleString('en-US'), breakdown: t.name + ' · ' + score.toLocaleString('en-US') + ' pts\n' + parts.map(([n, v, w]) => n + '  +' + Math.round(v * w).toLocaleString('en-US')).join('\n') + '\n\nR 600 · SR 1,200 · UR 1,900 · SPR 2,700' };
     })();
     let qr = '';
     try { if (window.qrcode) { const qUrl = (c && c.raidUrl) || (this.P ? GL.reportUrl('raid', this.P) : 'https://raid.report'); if (this.qrFor !== qUrl) { const q = window.qrcode(0, 'M'); q.addData(qUrl); q.make(); this.qrUrl = q.createDataURL(4, 0); this.qrFor = qUrl; } qr = this.qrUrl; } else if (!this.qrWait) { this.qrWait = setInterval(() => { if (window.qrcode) { clearInterval(this.qrWait); this.forceUpdate(); } }, 200); } } catch (e) {}
