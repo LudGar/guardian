@@ -2,9 +2,13 @@
 
 Your Destiny 2 raid and dungeon résumé on one page, plus a holographic card you can share.
 
+**Open it:** https://ludgar.github.io/guardian/
+
+> Hosting your own copy? See [SETUP.md](SETUP.md).
+
 ---
 
-## Find Your Guardian
+## Find a Guardian
 
 1. Open the site. You land on the search page.
 2. Type a **Bungie Name** with its code, e.g. `LudGar#1234`, and pick the result.
@@ -44,7 +48,6 @@ One card per activity:
 - **Number:** total clears
 - **Tags:** Trio, Solo, Flawless, Day One and so on
 - **Dots:** recent runs, oldest on the left. Green is completed, red is incomplete; higher dots are faster runs. Hover a dot for its date and time, click it to open that run.
-- **Sherpas:** how many players you carried to their first clear
 
 ---
 
@@ -55,7 +58,7 @@ A trading card for your Guardian, sized 1200×630 for posting.
 - **Move your mouse** over it to tilt it and catch the holo foil. Left alone, it sways on its own.
 - **Header:** emblem, name, light level, Guardian rank, commendations and Triumph score
 - **Colored line:** your commendations split by category. Hover a section for its name.
-- **Stats:** raid clears, full raid clears, dungeon clears, sherpas, and a QR code to your raid.report page
+- **Stats:** raid clears, full raid clears, dungeon clears, and a QR code to your raid.report page
 - **Pips:** one per activity, newest on the right
   - Gold: flawless
   - Red: Trio or Solo (for dungeons, Solo only)
@@ -81,10 +84,10 @@ Click one and it's saved for everyone who views your card.
 
 Some things Bungie doesn't share, so you fill them in yourself:
 
-- **Sherpas** and **full raid clears**: copy them from raid.report
-- **Tags** the live check missed, usually older Trio or Flawless clears
+- **Full raid clears**: copy it from raid.report
+- **Plaques** the live check missed, usually older Trio, Solo or Flawless clears
 
-Sign in with Bungie, then open **Edit plaques** from your profile. Toggle tags on or off and press **Save**. Your edits are visible to everyone.
+Sign in with Bungie, then open **Edit plaques** from your profile. Toggle plaques on or off and press **Save**. Your edits are visible to everyone.
 
 Only the Guardian's owner can edit. Everyone else sees "Sign in" or "Not your Guardian".
 

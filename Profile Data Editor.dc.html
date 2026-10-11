@@ -21,7 +21,7 @@ a{color:#e8e9ec;text-decoration:none}a:hover{color:oklch(0.82 0.13 85)}
     <div style="display:flex;flex-direction:column;gap:6px;">
       <a href="{{ backHref }}" style="font-family:'Space Mono',monospace;font-size:12px;color:#8a8f98;">← Back to {{ who }}</a>
       <h1 style="margin:0;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:44px;text-transform:uppercase;">Edit plaques</h1>
-      <p style="margin:0;font-size:14px;color:#8a8f98;max-width:560px;">Clears, characters and timelines are live. Add your sherpas, full clears and any tags the live check missed. Saved in this browser only.</p>
+      <p style="margin:0;font-size:14px;color:#8a8f98;max-width:560px;">Clears, characters and timelines are live. Add your full raid clears and any plaques the live check missed.</p>
     </div>
     <sc-if value="{{ canEdit }}" hint-placeholder-val="{{ false }}">
     <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
@@ -66,17 +66,12 @@ a{color:#e8e9ec;text-decoration:none}a:hover{color:oklch(0.82 0.13 85)}
 
   <sc-for list="{{ groups }}" as="g" hint-placeholder-count="3">
     <section style="display:flex;flex-direction:column;gap:4px;">
-      <div style="display:grid;grid-template-columns:minmax(160px,220px) 90px minmax(0,1fr);gap:16px;align-items:end;margin-bottom:8px;">
-        <h2 style="margin:0;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:26px;text-transform:uppercase;letter-spacing:.04em;">{{ g.title }}</h2>
-        <span style="font-family:'Space Grotesk',sans-serif;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#6b717b;">Sherpas</span>
-        <span style="font-family:'Space Grotesk',sans-serif;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#6b717b;">Tags</span>
-      </div>
+      <h2 style="margin:0 0 8px;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:26px;text-transform:uppercase;letter-spacing:.04em;">{{ g.title }}</h2>
       <sc-for list="{{ g.rows }}" as="r" hint-placeholder-count="6">
-        <div style="display:grid;grid-template-columns:minmax(160px,220px) 90px minmax(0,1fr);gap:16px;align-items:center;padding:10px 0;border-top:1px solid #22262d;">
+        <div style="display:grid;grid-template-columns:minmax(160px,220px) minmax(0,1fr);gap:16px;align-items:center;padding:10px 0;border-top:1px solid #22262d;">
           <span style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:16px;text-transform:uppercase;">{{ r.name }}</span>
-          <input type="number" min="0" value="{{ r.sherpas }}" onChange="{{ r.setSherpas }}" style="font-family:'Space Mono',monospace;font-size:14px;color:#e8e9ec;background:#0d0f12;border:1px solid #2a2f37;padding:6px 8px;width:100%;box-sizing:border-box;">
           <div style="display:flex;gap:6px;flex-wrap:wrap;">
-            <sc-for list="{{ r.opts }}" as="o" hint-placeholder-count="5">
+            <sc-for list="{{ r.opts }}" as="o" hint-placeholder-count="3">
               <button onClick="{{ o.toggle }}" style="font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:6px 10px;cursor:pointer;border:1px solid {{ o.border }};background:{{ o.bg }};color:{{ o.color }};">{{ o.label }}</button>
             </sc-for>
           </div>
@@ -89,7 +84,18 @@ a{color:#e8e9ec;text-decoration:none}a:hover{color:oklch(0.82 0.13 85)}
 <script type="text/x-dc" data-dc-script data-props="{&quot;player&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
 class Component extends DCLogic {
   state = { data: null, status: '', dirty: false };
-  OPTS = ['Trio', 'Duo', 'Solo', 'Flawless', 'Flawless Trio', 'Flawless Duo', 'Solo Flawless', 'Day One', 'Week One'];
+  OPTS = { raids: ['Trio', 'Flawless', 'Flawless Trio'], dungeons: ['Solo', 'Flawless', 'Solo Flawless'], missions: ['Solo', 'Flawless', 'Solo Flawless'] };
+  withBase(d) {
+    const b = this.base;
+    if (!d || !b) return d;
+    const fill = (saved = [], base = []) => {
+      const m = new Map(saved.map(r => [r[0], r]));
+      const out = base.map(r => m.get(r[0]) || [r[0], 0, [], '', 0]);
+      saved.forEach(r => { if (!base.some(x => x[0] === r[0])) out.push(r); });
+      return out;
+    };
+    return { ...d, raids: fill(d.raids, b.raids), dungeons: fill(d.dungeons, b.dungeons), missions: fill(d.missions, b.missions) };
+  }
   componentDidMount() {
     const wait = async () => {
       if (!window.GL) return setTimeout(wait, 50);
@@ -103,6 +109,7 @@ class Component extends DCLogic {
       if (!a) return this.setState({ needLogin: true });
       if (!GL.isOwner(p)) return this.setState({ notOwner: true });
       this.setState({ canEdit: true });
+      this.base = await fetch('./profile.json').then(r => r.json()).catch(() => null);
       const remote = await GL.loadEdits(p.id);
       if (remote) return this.setState({ data: remote, status: 'Loaded shared data' });
       try {
@@ -117,18 +124,16 @@ class Component extends DCLogic {
   loadFile() {
     fetch('./profile.json').then(r => r.json()).then(base => this.setState({ data: this.P.id === GL.OWNER ? base : GL.blank(base), status: 'Loaded defaults', dirty: false }));
   }
-  update(fn) { this.setState(s => { const d = JSON.parse(JSON.stringify(s.data)); fn(d); return { data: d, dirty: true, status: 'Unsaved changes' }; }); }
+  update(fn) { this.setState(s => { const d = JSON.parse(JSON.stringify(this.withBase(s.data))); fn(d); return { data: d, dirty: true, status: 'Unsaved changes' }; }); }
   renderVals() {
-    const d = this.state.data || { raids: [], dungeons: [], missions: [], profile: {} };
+    const d = this.withBase(this.state.data) || { raids: [], dungeons: [], missions: [], profile: {} };
     const gold = 'oklch(0.82 0.13 85)';
     const q = window.GL && this.P ? GL.qs(this.P) : '';
     const grp = (title, key) => ({
       title,
       rows: d[key].map((r, i) => ({
         name: r[0],
-        sherpas: r[4] || 0,
-        setSherpas: e => { const v = Math.max(0, +e.target.value || 0); this.update(x => { x[key][i][4] = v; }); },
-        opts: this.OPTS.map(label => {
+        opts: this.OPTS[key].map(label => {
           const on = r[2].includes(label);
           return { label, bg: on ? gold : 'transparent', color: on ? '#0d0f12' : '#8a8f98', border: on ? gold : '#2a2f37',
             toggle: () => this.update(x => { const t = x[key][i][2]; const j = t.indexOf(label); if (j >= 0) t.splice(j, 1); else t.push(label); }) };
