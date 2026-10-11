@@ -46,15 +46,18 @@ window.GL = (() => {
     profile: {}
   });
   const k = (id, s) => 'gl-' + s + '-' + id;
+  // One-way hash: the database only ever sees this, never the membership ID or name.
+  const hashes = {};
+  const hashId = id => hashes[id] || (hashes[id] = crypto.subtle.digest('SHA-256', new TextEncoder().encode('guardian:' + id)).then(b => [...new Uint8Array(b)].map(x => x.toString(16).padStart(2, '0')).join('')));
   const reg = {};
-  function register(p, name) {
+  function register(p) {
     if (!SUPABASE_URL || !SUPABASE_ANON_KEY || !p) return Promise.resolve(null);
     if (reg[p.id]) return reg[p.id];
-    return (reg[p.id] = fetch(SUPABASE_URL.replace(/\/$/, '') + '/rest/v1/rpc/register_guardian', {
+    return (reg[p.id] = hashId(p.id).then(h => fetch(SUPABASE_URL.replace(/\/$/, '') + '/rest/v1/rpc/register_guardian', {
       method: 'POST',
       headers: { apikey: SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ p_id: String(p.id), p_type: p.type, p_name: name || '' })
-    }).then(r => r.ok ? r.json() : null).then(rows => {
+      body: JSON.stringify({ p_hash: h })
+    })).then(r => r.ok ? r.json() : null).then(rows => {
       const row = Array.isArray(rows) ? rows[0] : rows;
       return row ? { no: +row.card_no, total: +row.total } : null;
     }).catch(() => null));
@@ -64,7 +67,10 @@ window.GL = (() => {
   // ---- Bungie sign-in (OAuth, public client) ----
   const AUTH = 'gl-auth';
   const auth = () => { try { const a = JSON.parse(localStorage.getItem(AUTH)); return a && a.exp > Date.now() ? a : null; } catch (e) { return null; } };
-  const isOwner = p => { const a = auth(); return !!(a && p && a.ids.includes(String(p.id))); };
+  const stored = () => { try { return JSON.parse(localStorage.getItem(AUTH)); } catch (e) { return null; } };
+  // Owner check survives token expiry so owner UI doesn't vanish; saving still needs a fresh sign-in.
+  const isOwner = p => { const a = stored(); return !!(a && p && a.ids && a.ids.includes(String(p.id))); };
+  const expired = () => { const a = stored(); return !!(a && !(a.exp > Date.now())); };
   const canLogin = () => !!BUNGIE_CLIENT_ID;
   function login(returnTo) {
     if (!BUNGIE_CLIENT_ID) return alert('Sign-in is not configured yet.');
@@ -111,13 +117,14 @@ window.GL = (() => {
   async function loadEdits(id) {
     if (!hasDb()) return null;
     try {
-      const rows = await fetch(sb('/rest/v1/guardian_edits?select=data&membership_id=eq.' + encodeURIComponent(id)), { headers: { apikey: SUPABASE_ANON_KEY } }).then(r => r.ok ? r.json() : []);
+      const h = await hashId(id);
+      const rows = await fetch(sb('/rest/v1/guardian_edits?select=data&id_hash=eq.' + h), { headers: { apikey: SUPABASE_ANON_KEY } }).then(r => r.ok ? r.json() : []);
       return rows && rows[0] ? rows[0].data : null;
     } catch (e) { return null; }
   }
   async function saveEdits(id, data) {
     const a = auth();
-    if (!a) throw new Error('Sign in first');
+    if (!a) throw new Error(expired() ? 'Session expired — sign in again to save' : 'Sign in first');
     if (!hasDb()) return false;
     const r = await fetch(sb('/functions/v1/save-guardian'), {
       method: 'POST',
@@ -127,5 +134,5 @@ window.GL = (() => {
     if (!r.ok) throw new Error(r.status === 403 ? 'Not your Guardian' : 'Save failed (' + r.status + ')');
     return true;
   }
-  return { register, auth, isOwner, canLogin, login, logout, ready, hasDb, loadEdits, saveEdits, landing, KEY, OWNER, get, api, post, PLAT, parse, fromUrl, resolve, search, blank, k, qs, reportUrl };
+  return { register, auth, stored, expired, isOwner, canLogin, login, logout, ready, hasDb, loadEdits, saveEdits, landing, KEY, OWNER, get, api, post, PLAT, parse, fromUrl, resolve, search, blank, k, qs, reportUrl };
 })();

@@ -10,6 +10,8 @@ const cors = {
   'Access-Control-Allow-Headers': 'authorization, apikey, content-type, x-bungie-token',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
+const hashId = async (id: string) =>
+  [...new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode('guardian:' + id)))].map((x) => x.toString(16).padStart(2, '0')).join('');
 const reply = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { ...cors, 'Content-Type': 'application/json' } });
 
@@ -30,7 +32,7 @@ Deno.serve(async (req) => {
     if (!ids.includes(String(membershipId))) return reply({ error: 'forbidden' }, 403);
 
     const sb = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
-    const { error } = await sb.from('guardian_edits').upsert({ membership_id: String(membershipId), data, updated_at: new Date().toISOString() });
+    const { error } = await sb.from('guardian_edits').upsert({ id_hash: await hashId(String(membershipId)), data, updated_at: new Date().toISOString() });
     if (error) throw error;
     return reply({ ok: true });
   } catch (e) {

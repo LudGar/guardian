@@ -289,7 +289,7 @@ class Component extends DCLogic {
       }
       const base = { chars, triumph, commend, gr, name, code };
       this.setState({ live: base, liveErr: null });
-      GL.register(this.P, name + (code ? '#' + code : '')).then(serial => { if (serial) this.setState({ serial }); });
+      GL.register(this.P).then(serial => { if (serial) this.setState({ serial }); });
       this.loadGear();
       const lists = await Promise.all(chars.flatMap(c => [4, 82].map(mode =>
         api(`/Destiny2/${MT}/Account/${MID}/Character/${c.characterId}/Stats/Activities/?count=30&mode=${mode}`).then(r => (r.activities || []).map(a => ({ ...a, mode, cls: c.classType }))).catch(() => []))));
@@ -480,7 +480,7 @@ class Component extends DCLogic {
       platformLine: pl && G ? ((G.PLAT[pl.type] || {}).label || 'Bungie') + (L && L.code ? ' · ' + L.name + '#' + L.code : '') : '',
       emblemBg: emblemPath ? `#15181c url('https://www.bungie.net${emblemPath}') center / cover no-repeat` : '#15181c',
       editHref: './Profile Data Editor.dc.html' + q,
-      canEdit: !!(G && pl && this.state.auth && G.isOwner(pl)),
+      canEdit: !!(G && pl && G.isOwner(pl)),
       showSignIn: !!(G && pl && !this.state.auth && G.canLogin()),
       signIn: () => G && G.login(location.href),
       cardHref: './Guardian Share Card.dc.html' + q,
