@@ -86,7 +86,7 @@ a{color:#e8e9ec;text-decoration:none}a:hover{color:oklch(0.82 0.13 85)}
         <span></span>
         <span data-tip="{{ tier.breakdown }}" style="display:flex;align-items:center;gap:10px;">
           <span style="font-family:var(--fd),sans-serif;font-weight:700;font-size:18px;letter-spacing:.08em;padding:2px 10px;border-radius:4px;background:{{ tier.badge }};color:#0d0f12;">{{ tier.code }}</span>
-          <span data-tip="{{ serialTip }}" style="color:oklch(0.82 0.13 85);">◆ GDN · {{ serial }}</span>
+          <span data-tip="{{ serialTip }}" style="color:oklch(0.82 0.13 85);">◆ {{ setCode }} · {{ serial }}</span>
         </span>
       </div>
 
@@ -286,9 +286,9 @@ class Component extends DCLogic {
     const tier = (() => {
       const A = (c && c.acts) || { raids: [], dungeons: [], missions: [] };
       const parts = [
-        ['Raid clears', c ? c.raidClears : 0, 0.6],
-        ['Dungeon clears', c ? c.dungeonClears : 0, 0.4],
-        ['Triumph score', c && c.triumph ? c.triumph / 1000 : 0, 1],
+        ['Raid clears', c ? c.raidClears : 0, 0.8],
+        ['Dungeon clears', c ? c.dungeonClears : 0, 0.6],
+        ['Triumph score', c && c.triumph ? c.triumph : 0, 0.001],
         ['Guardian rank', c && c.gr ? c.gr : 0, 50],
         ['Commendations', c && c.commend ? c.commend.total : 0, 0.1]
       ];
@@ -302,8 +302,10 @@ class Component extends DCLogic {
       ];
       const forced = this.props.tierPreview && this.props.tierPreview !== 'auto' ? T.find(t => t.code === this.props.tierPreview) : null;
       const t = forced || T.slice().reverse().find(x => score >= x.min);
+      const f = n => Number(n).toLocaleString('en-US', { maximumFractionDigits: 3 });
+      
       this.tierHolo = t.holo;
-      return { ...t, score: score.toLocaleString('en-US'), breakdown: t.name + ' · ' + score.toLocaleString('en-US') + ' pts\n' + parts.map(([n, v, w]) => n + '  +' + Math.round(v * w).toLocaleString('en-US')).join('\n') + '\n\nR 600 · SR 1,200 · UR 1,900 · SPR 2,700' };
+      return { ...t, score: score.toLocaleString('en-US'), breakdown: t.name + ' · ' + score.toLocaleString('en-US') + ' pts\n' + parts.map(([n, v, w]) => n + '  ' + f(v) + ' × ' + f(w) + ' = +' + Math.round(v * w).toLocaleString('en-US')).join('\n') + '\n\nR 600 · SR 1,200 · UR 1,900 · SPR 2,700' };
     })();
     let qr = '';
     try { if (window.qrcode) { const qUrl = (c && c.raidUrl) || (this.P ? GL.reportUrl('raid', this.P) : 'https://raid.report'); if (this.qrFor !== qUrl) { const q = window.qrcode(0, 'M'); q.addData(qUrl); q.make(); this.qrUrl = q.createDataURL(4, 0); this.qrFor = qUrl; } qr = this.qrUrl; } else if (!this.qrWait) { this.qrWait = setInterval(() => { if (window.qrcode) { clearInterval(this.qrWait); this.forceUpdate(); } }, 200); } } catch (e) {}
@@ -330,8 +332,26 @@ class Component extends DCLogic {
       signIn: () => window.GL && GL.login(location.href),
       raidUrl: window.GL ? GL.reportUrl('raid', this.P) : '#',
       dungeonUrl: window.GL ? GL.reportUrl('dungeon', this.P) : '#',
-      serial: c && c.serial ? String(c.serial.no).padStart(3, '0') + '/' + String(c.serial.total).padStart(3, '0') : '—/—',
-      serialTip: c && c.serial ? 'Card No. ' + c.serial.no.toLocaleString('en-US') + '\n' + c.serial.total.toLocaleString('en-US') + ' Guardians looked up so far\nNumber = order of first lookup' : 'Card number\nAssigned on first lookup',
+      ...(() => {
+        const SETS = [
+          ['FWV', 'First Wave'], ['RDW', 'Red War'], ['IFF', 'Infinite Forest'], ['WRM', 'Warmind'],
+          ['DRC', 'Dreaming City'], ['UDM', 'Undying Mind'], ['DWN', 'Dawn'], ['DSC', 'Deep Stone'],
+          ['WQN', 'Witch Queen'], ['NEO', 'Neomuna'], ['PHT', 'Pale Heart'], ['EOF', 'Edge of Fate']
+        ];
+        const SIZE = 999;
+        if (!(c && c.serial)) return { setCode: 'GDN', serial: '—/—', serialTip: 'Card number not assigned yet' };
+        const n = c.serial.no, total = c.serial.total;
+        const si = Math.floor((n - 1) / SIZE);
+        const [code, name] = SETS[si] || ['S' + String(si + 1).padStart(2, '0'), 'Set ' + (si + 1)];
+        const inSet = ((n - 1) % SIZE) + 1;
+        const setCount = Math.min(SIZE, Math.max(0, total - si * SIZE));
+        const pad = x => String(x).padStart(3, '0');
+        return {
+          setCode: code,
+          serial: pad(inSet) + '/' + pad(SIZE),
+          serialTip: name + ' · Set ' + (si + 1) + '\nCard ' + pad(inSet) + ' of ' + SIZE + (setCount < SIZE ? ' · ' + setCount + ' issued so far' : ' · set complete') + '\nOverall No. ' + n.toLocaleString('en-US') + ' of ' + total.toLocaleString('en-US') + ' Guardians'
+        };
+      })(),
       hasPlayerRaw: !!this.state.playerRaw,
       emTabs: [['chars', 'Characters'], ['coll', 'Collections']].map(([k, label]) => ({ label, bg: this.state.emTab === k ? 'oklch(0.82 0.13 85)' : 'transparent', color: this.state.emTab === k ? '#0d0f12' : '#8a8f98', select: () => { this.setState({ emTab: k }); if (k === 'coll' && !this.state.coll) this.loadCollections(); } })),
       isChars: this.state.emTab === 'chars',
