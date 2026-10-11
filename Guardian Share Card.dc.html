@@ -331,7 +331,7 @@ class Component extends DCLogic {
         };
         const ORDER = ['Leviathan', 'Eater of Worlds', 'Spire of Stars', 'Last Wish', 'Scourge of the Past', 'Crown of Sorrow', 'Garden of Salvation', 'Deep Stone Crypt', 'Vault of Glass', 'Vow of the Disciple', "King's Fall", 'Root of Nightmares', "Crota's End", "Salvation's Edge", 'Pantheon', 'The Desert Perpetual',
           'Shattered Throne', 'Pit of Heresy', 'Prophecy', 'Grasp of Avarice', 'Duality', 'Spire of the Watcher', 'Ghosts of the Deep', "Warlord's Ruin", "Vesper's Host", 'Sundered Doctrine', 'Equilibrium',
-          'The Whisper', 'Zero Hour', 'Harbinger', 'Presage'];
+          'The Whisper', 'Zero Hour', 'Harbinger', 'Presage', 'Vox Obscura', "Seraph's Shield", 'Avalon', 'Starcrossed', 'Encore', "Kell's Fall"];
         const pos = n => { const i = ORDER.indexOf(n); return i < 0 ? 999 : i; };
         const HIDE = ['Pantheon'];
         const chrono = arr => arr.filter(r => !HIDE.includes(r[0])).sort((x, y) => pos(x[0]) - pos(y[0]));

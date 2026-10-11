@@ -35,7 +35,7 @@ a{color:#e8e9ec;text-decoration:none}a:hover{color:oklch(0.82 0.13 85)}
   <sc-if value="{{ noPlayer }}" hint-placeholder-val="{{ false }}">
     <section style="max-width:1200px;margin:0 auto;padding:120px 32px;display:flex;flex-direction:column;align-items:flex-start;gap:20px;">
       <div style="font-family:var(--fd),sans-serif;font-size:15px;letter-spacing:.2em;text-transform:uppercase;color:oklch(0.82 0.13 85);">{{ emptyKicker }}</div>
-      <h1 style="margin:0;font-family:var(--fd),sans-serif;font-weight:700;font-size:clamp(48px,8vw,96px);line-height:.9;text-transform:uppercase;">Find Your Guardian</h1>
+      <h1 style="margin:0;font-family:var(--fd),sans-serif;font-weight:700;font-size:clamp(48px,8vw,96px);line-height:.9;text-transform:uppercase;">Find a Guardian</h1>
       <a href="./Guardian Search.dc.html" style="font-family:var(--fd),sans-serif;font-weight:600;font-size:16px;letter-spacing:.14em;text-transform:uppercase;padding:14px 24px;background:oklch(0.82 0.13 85);color:#0d0f12;">Search by Bungie Name</a>
     </section>
   </sc-if>
@@ -218,6 +218,17 @@ a{color:#e8e9ec;text-decoration:none}a:hover{color:oklch(0.82 0.13 85)}
 <script type="text/x-dc" data-dc-script data-props="{&quot;player&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;layout&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;grid&quot;,&quot;list&quot;],&quot;default&quot;:&quot;grid&quot;,&quot;tsType&quot;:&quot;'grid'|'list'&quot;},&quot;sort&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;release&quot;,&quot;clears&quot;],&quot;default&quot;:&quot;clears&quot;,&quot;tsType&quot;:&quot;'release'|'clears'&quot;},&quot;showMissions&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;},&quot;showFeed&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;},&quot;feedCount&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;min&quot;:5,&quot;max&quot;:30,&quot;step&quot;:1,&quot;default&quot;:10,&quot;tsType&quot;:&quot;number&quot;},&quot;dotCount&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;min&quot;:5,&quot;max&quot;:40,&quot;step&quot;:1,&quot;default&quot;:15,&quot;tsType&quot;:&quot;number&quot;},&quot;font&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;barlow&quot;,&quot;space&quot;],&quot;default&quot;:&quot;space&quot;,&quot;tsType&quot;:&quot;'barlow'|'space'&quot;}}">
 class Component extends DCLogic {
   state = {};
+  withBase(d) {
+    const b = this.base;
+    if (!d || !b) return d;
+    const fill = (saved = [], base = []) => {
+      const m = new Map(saved.map(r => [r[0], r]));
+      const out = base.map(r => m.get(r[0]) || [r[0], 0, [], '', 0]);
+      saved.forEach(r => { if (!base.some(x => x[0] === r[0])) out.push(r); });
+      return out;
+    };
+    return { ...d, raids: fill(d.raids, b.raids), dungeons: fill(d.dungeons, b.dungeons), missions: fill(d.missions, b.missions) };
+  }
   applyFont() { document.body.dataset.font = this.props.font ?? 'space'; }
   componentDidMount() {
     this.applyFont();
@@ -243,7 +254,6 @@ class Component extends DCLogic {
     this.P = p;
     this.setState({ player: p, noPlayer: false });
     try { const c = JSON.parse(localStorage.getItem(GL.k(p.id, 'live'))); if (c) this.setState({ stats: c }); } catch (e) {}
-    if (p.id === GL.OWNER) fetch('./timelines.json').then(r => r.json()).then(tl => this.setState({ tl })).catch(() => {});
     window.addEventListener('storage', this.onStorage = e => { if (e.key === GL.k(p.id, 'profile')) this.loadData(); });
     await this.loadData();
     this.loadBungie();
@@ -251,6 +261,7 @@ class Component extends DCLogic {
   }
   async loadData() {
     const id = this.P.id;
+    if (!this.base) this.base = await fetch('./profile.json').then(r => r.json()).catch(() => null);
     const remote = await GL.loadEdits(id);
     if (remote) return this.setState({ data: remote });
     try {
@@ -258,7 +269,6 @@ class Component extends DCLogic {
       if (!s && id === GL.OWNER) s = localStorage.getItem('ludgar-profile');
       if (s) return this.setState({ data: JSON.parse(s) });
     } catch (e) {}
-    if (!this.base) this.base = await fetch('./profile.json').then(r => r.json()).catch(() => null);
     if (this.base) this.setState({ data: id === GL.OWNER ? this.base : GL.blank(this.base) });
   }
   async loadBungie() {
@@ -344,7 +354,7 @@ class Component extends DCLogic {
       try { const acct = await api(`/Destiny2/${MT}/Account/${MID}/Stats/`); cids = (acct.characters || []).map(c => c.characterId); } catch (e) {}
       if (!cids.length) { const prof = await api(`/Destiny2/${MT}/Profile/${MID}/?components=200`); cids = Object.keys(prof.characters.data); }
       const runs = new Map();
-      await Promise.all(cids.flatMap(cid => [4, 82].map(async mode => {
+      await Promise.all(cids.flatMap(cid => [4, 82, 2].map(async mode => {
         for (let page = 0; page < 40; page++) {
           const r = await api(`/Destiny2/${MT}/Account/${MID}/Character/${cid}/Stats/Activities/?count=250&mode=${mode}&page=${page}`).catch(() => null);
           const a = (r && r.activities) || [];
@@ -355,8 +365,8 @@ class Component extends DCLogic {
       const hashes = [...new Set([...runs.values()].map(r => r.activityDetails.referenceId))].filter(x => !(x in defs));
       await pool(hashes, 8, async x => { const d = await api(`/Destiny2/Manifest/DestinyActivityDefinition/${x}/`).catch(() => null); defs[x] = d ? ((d.originalDisplayProperties && d.originalDisplayProperties.name) || d.displayProperties.name || '') : ''; });
       save('ludgar-defs', defs);
-      const D = this.state.data || this.base || {};
-      const known = [...(D.raids || []), ...(D.dungeons || [])].map(r => [r[0], r[0].toLowerCase().replace(/[’‘]/g, "'").replace(/^the /, '')]).sort((a, b) => b[1].length - a[1].length);
+      const D = this.withBase(this.state.data) || this.base || {};
+      const known = [...(D.raids || []), ...(D.dungeons || []), ...(D.missions || [])].map(r => [r[0], r[0].toLowerCase().replace(/[’‘]/g, "'").replace(/^the /, '')]).sort((a, b) => b[1].length - a[1].length);
       const match = s => { const n = (s || '').toLowerCase().replace(/[’‘]/g, "'"); const k = known.find(([, kn]) => n.includes(kn)); return k && k[0]; };
       const ok = r => r.values.completed?.basic.value === 1 && r.values.completionReason?.basic.value === 0;
       const raidNames = new Set((D.raids || []).map(r => r[0]));
@@ -366,7 +376,7 @@ class Component extends DCLogic {
       for (const [name, list] of Object.entries(byName)) {
         const last = list.sort((a, b) => new Date(a.period) - new Date(b.period)).slice(-(this.props.dotCount ?? 15));
         const durs = last.map(r => r.values.activityDurationSeconds?.basic.value || 0), mn = Math.min(...durs), mx = Math.max(...durs), n = last.length;
-        tl[name] = { base: raidNames.has(name) ? 'https://raid.report' : 'https://dungeon.report', dots: last.map((r, i) => [n === 1 ? 50 : Math.round(i / (n - 1) * 1000) / 10, mx === mn ? 50 : Math.round((durs[i] - mn) / (mx - mn) * 1000) / 10, ok(r) ? 1 : 0, r.activityDetails.instanceId, new Date(r.period).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) + ' · ' + (r.values.activityDurationSeconds?.basic.displayValue || '')]) };
+        tl[name] = { base: raidNames.has(name) ? 'https://raid.report' : 'https://dungeon.report', pgcr: !raidNames.has(name) && (D.missions || []).some(m => m[0] === name), dots: last.map((r, i) => [n === 1 ? 50 : Math.round(i / (n - 1) * 1000) / 10, mx === mn ? 50 : Math.round((durs[i] - mn) / (mx - mn) * 1000) / 10, ok(r) ? 1 : 0, r.activityDetails.instanceId, new Date(r.period).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) + ' · ' + (r.values.activityDurationSeconds?.basic.displayValue || '')]) };
       }
       const clears = {}, cands = [];
       for (const r of runs.values()) {
@@ -408,7 +418,7 @@ class Component extends DCLogic {
     const showMissions = this.props.showMissions ?? true;
     const sort = this.props.sort ?? 'release';
     const G = window.GL, pl = this.state.player, L = this.state.live;
-    const D = this.state.data || { raids: [], dungeons: [], missions: [], profile: {} };
+    const D = this.withBase(this.state.data) || { raids: [], dungeons: [], missions: [], profile: {} };
     const raids = D.raids.map(r => r.slice()), dungeons = D.dungeons.map(r => r.slice()), missions = D.missions.map(r => r.slice());
     const P = D.profile || {};
     const S = this.state.stats;
@@ -424,7 +434,7 @@ class Component extends DCLogic {
         else if (flaw) out.push('Flawless');
         return out;
       };
-      [raids, dungeons].forEach(arr => arr.forEach((r, i) => {
+      [raids, dungeons, missions].forEach(arr => arr.forEach((r, i) => {
         arr[i] = [r[0], S.clears[r[0]] ?? r[1], rebuild(r[2], S.comp[r[0]]), r[3], r[4]];
       }));
     }
@@ -434,7 +444,7 @@ class Component extends DCLogic {
     const map = arr => {
       const out = arr.map(([name, clears, tags, fastest, sherpas]) => ({
         name, clears, fastest, sherpas, anchor: slug(name),
-        ...(() => { const t = (S && S.tl || {})[name] || (this.state.tl || {})[name]; const dots = t ? t.dots.map(([x, y, ok, id, lbl]) => ({ x, y, color: ok ? 'oklch(0.72 0.14 150)' : 'oklch(0.64 0.18 25)', href: t.base + '/pgcr/' + id, title: (lbl ? lbl + ' · ' : '') + (ok ? 'Completed' : 'Incomplete') })) : []; return { dots, hasDots: dots.length > 0 }; })(),
+        ...(() => { const t = (S && S.tl || {})[name] || (this.state.tl || {})[name]; const dots = t ? t.dots.map(([x, y, ok, id, lbl]) => ({ x, y, color: ok ? 'oklch(0.72 0.14 150)' : 'oklch(0.64 0.18 25)', href: t.pgcr ? 'https://pgcr.report/' + id : t.base + '/pgcr/' + id, title: (lbl ? lbl + ' · ' : '') + (ok ? 'Completed' : 'Incomplete') })) : []; return { dots, hasDots: dots.length > 0 }; })(),
         bg: flash === slug(name) ? '#2a2618' : '#111418',
         sherpaColor: sherpas >= 10 ? gold : '#8a8f98',
         tags: tags.map(label => ({ label, color: /Flawless|Solo|Duo|Trio/.test(label) ? gold : '#a9aeb6' }))
