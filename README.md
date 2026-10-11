@@ -1,94 +1,112 @@
 # Guardian
 
-A Destiny 2 profile page for any Guardian: raid, dungeon and exotic-mission clears, flawless and lowman plaques, equipped gear, recent activity, and a holographic share card with a rarity tier.
+Your Destiny 2 raid and dungeon résumé on one page, plus a holographic card you can share.
 
-**Live:** https://ludgar.github.io/guardian/
+---
 
-## Pages
+## Find Your Guardian
 
-| File | What it does |
-| --- | --- |
-| `index.html` | Redirects to the search page (also the Bungie sign-in return URL) |
-| `Guardian Search.dc.html` | Find a Guardian by Bungie Name, or sign in and open your own profile |
-| `Guardian Landing.dc.html` | Profile: characters and gear, plaques, latest activity, clears with run timelines |
-| `Guardian Share Card.dc.html` | 3D holographic card with tier, stats, pips and a QR code; owners can pick the card emblem |
-| `Profile Data Editor.dc.html` | Owner-only editor for sherpas, full raid clears and extra tags |
+1. Open the site. You land on the search page.
+2. Type a **Bungie Name** with its code, e.g. `LudGar#1234`, and pick the result.
+3. You're on that Guardian's profile. Copy the address bar to share it; the link always opens the same Guardian.
 
-Profiles are addressed by `?p=<membershipType>-<membershipId>` or `?player=Name%231234`.
+**Your own profile:** press **Sign in with Bungie**, approve on bungie.net, and you're taken straight to your profile. After that the search page shows a **My profile** button, so you don't need to type your name again.
 
-## Data sources
+Works for PlayStation, Xbox, Steam and Epic accounts.
 
-- **Bungie API (live):** characters, gear, emblems, light level, Guardian rank, Triumph score, commendations, clear counts, run timelines, Trio/Solo/Flawless detection
-- **Entered by the owner:** sherpas, full raid clears and tags the live check missed. The live check only adds tags; it never removes them.
-- **Supabase:** card numbers (order of first lookup) and the owner's shared edits
+---
 
-Bungie doesn't reliably mark full vs. checkpoint runs or first-time clears, so full clears and sherpas can't be computed live.
+## The profile page
 
-## Tier score
+The first visit to a profile can take a minute or two while every run in that Guardian's history is checked. The footer shows progress. Later visits load fast.
 
-Only live stats count, so every Guardian is scored the same way:
+### Header
+Emblem, name, light level and stat boxes. The **Raid Report** and **Dungeon Report** boxes open that Guardian on those sites. **Share card** opens the card.
 
-| Stat | Points |
-| --- | --- |
-| Raid clears | 0.6 each |
-| Dungeon clears | 0.4 each |
-| Flawless activity | 40 |
-| Lowman activity | 30 |
-| Flawless lowman activity | 60 |
-| Triumph score | 1 per 1,000 |
-| Guardian rank | 50 per rank |
-| Commendations | 0.1 each |
+### Characters
+Each character's equipped armor, with the ornament and shader under each piece. Exotics have a gold outline. The emblem is behind the class name, and the most recently played character comes first.
 
-**C** < 800 · **R** 800 · **SR** 1,600 · **UR** 2,600 · **SPR** 3,600+
+### Plaques
+Lowman and flawless clears, grouped as **Raid**, **Dungeon** and **Exotic**:
 
-## Setup
+- **Trio**: raids done with three players or fewer
+- **Solo**: dungeons and exotic missions done alone
+- **Flawless**: completed with nobody in the group dying
 
-### 1. Bungie application
+Click any activity name to jump to its card further down.
 
-At [bungie.net/en/Application](https://www.bungie.net/en/Application):
+### Latest activity
+Your most recent raid and dungeon runs with date and run time. Click a row to open the full run report.
 
-- **Origin Header:** `https://ludgar.github.io`
-- **OAuth Client Type:** Public
-- **Redirect URL:** `https://ludgar.github.io/guardian/`
+### Raids, dungeons and exotic missions
+One card per activity:
 
-Put the API key and OAuth Client ID in `guardian.js` (`KEY`, `BUNGIE_CLIENT_ID`).
+- **Number:** total clears
+- **Tags:** Trio, Solo, Flawless, Day One and so on
+- **Dots:** recent runs, oldest on the left. Green is completed, red is incomplete; higher dots are faster runs. Hover a dot for its date and time, click it to open that run.
+- **Sherpas:** how many players you carried to their first clear
 
-### 2. Supabase
+---
 
-1. Run `supabase-setup.sql` in the SQL Editor. It creates `guardians` and `guardian_edits`.
-2. Deploy the Edge Function `supabase/functions/save-guardian` with JWT verification **off** (set in `supabase/config.toml`):
-   ```
-   supabase functions deploy save-guardian --no-verify-jwt
-   ```
-3. Add the function secrets:
-   ```
-   supabase secrets set BUNGIE_API_KEY=<your key> SITE_ORIGIN=https://ludgar.github.io
-   ```
-4. Put the project URL and publishable key in `guardian.js` (`SUPABASE_URL`, `SUPABASE_ANON_KEY`).
+## The share card
 
-### 3. GitHub Pages
+A trading card for your Guardian, sized 1200×630 for posting.
 
-Settings → Pages → deploy from `main`, root folder.
+- **Move your mouse** over it to tilt it and catch the holo foil. Left alone, it sways on its own.
+- **Header:** emblem, name, light level, Guardian rank, commendations and Triumph score
+- **Colored line:** your commendations split by category. Hover a section for its name.
+- **Stats:** raid clears, full raid clears, dungeon clears, sherpas, and a QR code to your raid.report page
+- **Pips:** one per activity, newest on the right
+  - Gold: flawless
+  - Red: Trio or Solo (for dungeons, Solo only)
+  - Gold with a red ring: flawless and lowman
+  - Grey: cleared
+  - The number under each pip is its clear count. Hover for details.
+- **Tier badge (bottom right):** your rarity, from lowest to highest: **C** (Common), **R** (Rare), **SR** (Super Rare), **UR** (Ultra Rare), **SPR** (Special Rare). Hover it to see how your score adds up.
+- **◆ GDN · 012/340:** the card number. The first number is when this Guardian was first looked up on the site; the second is how many Guardians have been looked up in total. A card keeps its number for good.
 
-## Security notes
+The card updates by itself when the profile data changes.
 
-- The Bungie API key and Supabase publishable key are visible in the page source. Both are meant to be public, and the Bungie key is limited to this site's origin.
-- Edits are only saved after the Edge Function checks the visitor's Bungie sign-in against the Guardian's memberships.
-- The `guardians` table is only reachable through `register_guardian()`. Card numbers could still be claimed with made-up IDs; add a Bungie lookup in a function if that becomes a problem.
-- Bungie sign-in for public clients lasts about an hour, then visitors sign in again.
+### Pick your card emblem
+Signed in as the card's owner, you'll see **Card emblem** below the card:
 
-## Files
+- **Characters:** the emblems your characters have equipped
+- **Collections:** every emblem you've unlocked, with a filter box. The first time, the list takes a few seconds to load.
 
-```
-index.html                         redirect to search
-guardian.js                        shared config, Bungie + Supabase helpers, sign-in
-profile.json                       activity list + LudGar's default data
-timelines.json                     LudGar's legacy run timelines
-support.js                         page runtime
-supabase-setup.sql                 database schema
-supabase/config.toml               function config
-supabase/functions/save-guardian/  owner-verified save
-archive/                           earlier single-player versions
-```
+Click one and it's saved for everyone who views your card.
+
+---
+
+## Edit your plaques
+
+Some things Bungie doesn't share, so you fill them in yourself:
+
+- **Sherpas** and **full raid clears**: copy them from raid.report
+- **Tags** the live check missed, usually older Trio or Flawless clears
+
+Sign in with Bungie, then open **Edit plaques** from your profile. Toggle tags on or off and press **Save**. Your edits are visible to everyone.
+
+Only the Guardian's owner can edit. Everyone else sees "Sign in" or "Not your Guardian".
+
+---
+
+## FAQ
+
+**My numbers don't match raid.report.**
+They count from the same history but with slightly different rules, so small differences are normal. Checkpoint runs count as clears here.
+
+**A Trio or Flawless tag is missing.**
+Bungie often doesn't record whether older runs started from the beginning, so they can't be confirmed. Add the tag in **Edit plaques**.
+
+**Edit plaques disappeared.**
+Bungie sign-ins last about an hour. Sign in again.
+
+**Collections or gear won't load.**
+On bungie.net, go to Settings → Privacy and make your collections and inventory public.
+
+**Is my account safe?**
+The site only reads public data. Signing in just proves which Guardian is yours; it can't change anything in your game.
+
+---
 
 Not affiliated with Bungie. Destiny is a trademark of Bungie, Inc.
