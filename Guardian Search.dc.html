@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#0d0f12;color:#e8e9ec;font-family:'Space Grotesk',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:#e8e9ec;text-decoration:none}a:hover{color:oklch(0.82 0.13 85)}
+input::placeholder{color:#6b717b}
+</style>
+<script src="./guardian.js"></script>
+</helmet>
+<div style="min-height:100vh;max-width:880px;margin:0 auto;padding:32px 32px 96px;box-sizing:border-box;display:flex;flex-direction:column;gap:36px;">
+  <div style="display:flex;justify-content:flex-end;align-items:center;gap:12px;flex-wrap:wrap;min-height:44px;">
+    <sc-if value="{{ signedIn }}" hint-placeholder-val="{{ false }}">
+      <span style="font-family:'Space Mono',monospace;font-size:12px;color:#8a8f98;">Signed in as {{ meName }}</span>
+      <a href="{{ meHref }}" style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:14px;letter-spacing:.12em;text-transform:uppercase;padding:10px 18px;background:oklch(0.82 0.13 85);color:#0d0f12;">My profile</a>
+      <button onClick="{{ signOut }}" style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:14px;letter-spacing:.12em;text-transform:uppercase;padding:10px 18px;background:none;color:#8a8f98;border:1px solid #2a2f37;cursor:pointer;">Sign out</button>
+    </sc-if>
+    <sc-if value="{{ signedOut }}" hint-placeholder-val="{{ true }}">
+      <button onClick="{{ signIn }}" style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:14px;letter-spacing:.12em;text-transform:uppercase;padding:10px 18px;background:none;color:#e8e9ec;border:1px solid #2a2f37;cursor:pointer;" style-hover="border-color:oklch(0.82 0.13 85);color:oklch(0.82 0.13 85);">Sign in with Bungie</button>
+    </sc-if>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:14px;">
+    <div style="font-family:'Space Grotesk',sans-serif;font-size:15px;letter-spacing:.2em;text-transform:uppercase;color:oklch(0.82 0.13 85);">Raids · Dungeons · Exotic missions</div>
+    <h1 style="margin:0;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(48px,8vw,96px);line-height:.9;text-transform:uppercase;letter-spacing:-.01em;">Find a Guardian</h1>
+    <p style="margin:0;max-width:520px;font-size:17px;line-height:1.5;color:#a9aeb6;text-wrap:pretty;">Search by Bungie Name across PlayStation, Xbox, Steam and Epic. Every profile has a shareable link and share card.</p>
+  </div>
+  <form onSubmit="{{ submit }}" style="display:flex;gap:0;border:1px solid #2a2f37;">
+    <input value="{{ query }}" onChange="{{ onInput }}" placeholder="Name#1234" autofocus style="flex:1;min-width:0;font-family:'Space Mono',monospace;font-size:20px;color:#e8e9ec;background:#111418;border:0;outline:none;padding:18px 20px;">
+    <button type="submit" style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:15px;letter-spacing:.14em;text-transform:uppercase;padding:0 28px;background:oklch(0.82 0.13 85);color:#0d0f12;border:0;cursor:pointer;">Search</button>
+  </form>
+  <div style="font-family:'Space Mono',monospace;font-size:12px;color:{{ statusColor }};min-height:16px;">{{ status }}</div>
+  <div style="display:flex;flex-direction:column;border-top:1px solid #22262d;">
+    <sc-for list="{{ results }}" as="r" hint-placeholder-count="0">
+      <a href="{{ r.href }}" style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:center;padding:16px 12px;border-bottom:1px solid #22262d;transition:background .15s;" style-hover="background:#161a1f;">
+        <span style="display:flex;align-items:baseline;gap:6px;min-width:0;">
+          <span style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:22px;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ r.name }}</span>
+          <span style="font-family:'Space Mono',monospace;font-size:14px;color:#6b717b;">#{{ r.code }}</span>
+        </span>
+        <span style="font-family:'Space Grotesk',sans-serif;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#8a8f98;">{{ r.platforms }} →</span>
+      </a>
+    </sc-for>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { query: '', results: [], status: '', err: false };
+  go(p) { location.href = './Guardian Landing.dc.html' + GL.qs(p); }
+  async run(q) {
+    if (!window.GL) return;
+    const n = ++this.seq;
+    if (q.length < 2) return this.setState({ results: [], status: '' });
+    this.setState({ status: 'Searching…', err: false });
+    try {
+      const name = q.includes('#') ? q.slice(0, q.lastIndexOf('#')) : q;
+      const code = q.includes('#') ? q.slice(q.lastIndexOf('#') + 1) : '';
+      let res = await GL.search(name);
+      if (n !== this.seq) return;
+      if (code) res = res.filter(r => r.code.startsWith(code.padStart(code.length, '0')));
+      this.setState({ results: res, status: res.length ? res.length + ' Guardian' + (res.length > 1 ? 's' : '') : 'No Guardians found' });
+    } catch (e) { if (n === this.seq) this.setState({ status: 'Bungie API unavailable: ' + e.message, err: true }); }
+  }
+  seq = 0;
+  componentDidMount() {
+    const wait = async () => { if (!window.GL) return setTimeout(wait, 50); await GL.ready; this.setState({ auth: GL.auth() }); };
+    wait();
+  }
+  renderVals() {
+    const a = this.state.auth;
+    return {
+      signedIn: !!a,
+      signedOut: !a,
+      meName: a ? a.name : '',
+      meHref: a && a.me && window.GL ? GL.landing(a.me) : '#',
+      signIn: () => GL.login('me'),
+      signOut: () => { GL.logout(); this.setState({ auth: null }); },
+      query: this.state.query,
+      status: this.state.status,
+      statusColor: this.state.err ? 'oklch(0.64 0.18 25)' : '#8a8f98',
+      results: this.state.results.map(r => ({ ...r, platforms: r.platforms.join(' · '), href: './Guardian Landing.dc.html' + (window.GL ? GL.qs(r) : '') })),
+      onInput: e => { const v = e.target.value; this.setState({ query: v }); clearTimeout(this.t); this.t = setTimeout(() => this.run(v.trim()), 300); },
+      submit: async e => {
+        e.preventDefault();
+        const q = this.state.query.trim();
+        if (/^.+#\d{4}$/.test(q)) {
+          this.setState({ status: 'Opening…', err: false });
+          try { const p = await GL.resolve({ name: q }); return this.go(p); } catch (err) { return this.setState({ status: 'Guardian not found', err: true }); }
+        }
+        if (this.state.results.length === 1) return this.go(this.state.results[0]);
+        this.run(q);
+      }
+    };
+  }
+}
+</script>
+</body>
+</html>

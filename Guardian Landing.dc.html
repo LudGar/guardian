@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#0d0f12;color:#e8e9ec;font-family:var(--fb),system-ui,sans-serif;-webkit-font-smoothing:antialiased;--fd:'Barlow Condensed';--fb:'Barlow';--fm:'JetBrains Mono'}
+body[data-font="space"]{--fd:'Space Grotesk';--fb:'Space Grotesk';--fm:'Space Mono'}
+a{color:#e8e9ec;text-decoration:none}a:hover{color:oklch(0.82 0.13 85)}
+</style>
+<script src="./guardian.js"></script>
+</helmet>
+<div style="min-height:100vh;background:#0d0f12;">
+  <header style="max-width:1200px;margin:0 auto;padding:28px 32px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;">
+    <a href="./Guardian Search.dc.html" style="font-family:var(--fm),monospace;font-size:12px;letter-spacing:.14em;color:#8a8f98;text-transform:uppercase;">← Search · {{ platformLine }}</a>
+    <nav style="display:flex;gap:24px;flex-wrap:wrap;font-family:var(--fd),sans-serif;font-size:15px;letter-spacing:.1em;text-transform:uppercase;">
+      <a href="#characters">Characters</a>
+      <a href="#plaques">Plaques</a>
+      <sc-if value="{{ showFeed }}" hint-placeholder-val="{{ true }}"><a href="#activity">Activity</a></sc-if>
+      <a href="#raids">Raids</a>
+      <a href="#dungeons">Dungeons</a>
+      <sc-if value="{{ canEdit }}" hint-placeholder-val="{{ false }}"><a href="{{ editHref }}">Edit plaques</a></sc-if>
+      <sc-if value="{{ showSignIn }}" hint-placeholder-val="{{ false }}"><button onClick="{{ signIn }}" style="font:inherit;letter-spacing:inherit;text-transform:inherit;background:none;border:0;padding:0;color:#e8e9ec;cursor:pointer;" style-hover="color:oklch(0.82 0.13 85);">Sign in</button></sc-if>
+      <a href="{{ cardHref }}">Share card</a>
+      <a href="{{ raidUrl }}" target="_blank">Raid Report ↗</a>
+      <a href="{{ dungeonUrl }}" target="_blank">Dungeon Report ↗</a>
+    </nav>
+  </header>
+
+  <sc-if value="{{ noPlayer }}" hint-placeholder-val="{{ false }}">
+    <section style="max-width:1200px;margin:0 auto;padding:120px 32px;display:flex;flex-direction:column;align-items:flex-start;gap:20px;">
+      <div style="font-family:var(--fd),sans-serif;font-size:15px;letter-spacing:.2em;text-transform:uppercase;color:oklch(0.82 0.13 85);">{{ emptyKicker }}</div>
+      <h1 style="margin:0;font-family:var(--fd),sans-serif;font-weight:700;font-size:clamp(48px,8vw,96px);line-height:.9;text-transform:uppercase;">Find a Guardian</h1>
+      <a href="./Guardian Search.dc.html" style="font-family:var(--fd),sans-serif;font-weight:600;font-size:16px;letter-spacing:.14em;text-transform:uppercase;padding:14px 24px;background:oklch(0.82 0.13 85);color:#0d0f12;">Search by Bungie Name</a>
+    </section>
+  </sc-if>
+  <sc-if value="{{ hasPlayer }}" hint-placeholder-val="{{ true }}">
+  <section style="max-width:1200px;margin:0 auto;padding:40px 32px 72px;display:flex;flex-direction:column;gap:40px;border-bottom:1px solid #22262d;">
+    <div style="position:relative;width:100%;max-width:474px;aspect-ratio:474/96;background:{{ emblemBg }};border:1px solid #2a2f37;"></div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:40px;align-items:end;">
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div style="font-family:var(--fd),sans-serif;font-size:15px;letter-spacing:.2em;text-transform:uppercase;color:oklch(0.82 0.13 85);">Sherpa · Raids &amp; Dungeons</div>
+        <h1 style="margin:0;font-family:var(--fd),sans-serif;font-weight:700;font-size:clamp(64px,11vw,136px);line-height:.88;letter-spacing:-.01em;text-transform:uppercase;">{{ displayName }}</h1>
+        <p style="margin:8px 0 0;max-width:460px;font-size:18px;line-height:1.5;color:#a9aeb6;text-wrap:pretty;">First clear or fiftieth, I'll walk you through every mechanic. Patient calls, no pressure, checkpoints welcome.</p>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:20px;">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <sc-for list="{{ ranks }}" as="k" hint-placeholder-count="4">
+            <div style="display:flex;flex-direction:column;gap:4px;padding:12px 16px;border:1px solid #2a2f37;min-width:120px;">
+              <span style="font-family:var(--fd),sans-serif;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#8a8f98;">{{ k.label }}</span>
+              <span style="font-family:var(--fm),monospace;font-size:15px;">{{ k.value }}</span>
+            </div>
+          </sc-for>
+        </div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;">
+          <a href="#" style="font-family:var(--fd),sans-serif;font-weight:600;font-size:16px;letter-spacing:.14em;text-transform:uppercase;padding:14px 24px;background:oklch(0.82 0.13 85);color:#0d0f12;" style-hover="background:oklch(0.88 0.12 85);color:#0d0f12;">Request a carry</a>
+          <a href="#raids" style="font-family:var(--fd),sans-serif;font-weight:600;font-size:16px;letter-spacing:.14em;text-transform:uppercase;padding:14px 24px;border:1px solid #2a2f37;">See clears</a>
+          <button onClick="{{ copyLink }}" style="font-family:var(--fd),sans-serif;font-weight:600;font-size:16px;letter-spacing:.14em;text-transform:uppercase;padding:14px 24px;border:1px solid #2a2f37;background:none;color:#e8e9ec;cursor:pointer;" style-hover="border-color:oklch(0.82 0.13 85);color:oklch(0.82 0.13 85);">{{ copyLabel }}</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="characters" style="max-width:1200px;margin:0 auto;padding:72px 32px 0;display:flex;flex-direction:column;gap:32px;">
+    <h2 style="margin:0;font-family:var(--fd),sans-serif;font-weight:600;font-size:40px;letter-spacing:.04em;text-transform:uppercase;">Characters</h2>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;">
+      <sc-for list="{{ characters }}" as="c" hint-placeholder-count="3">
+        <div style="display:flex;flex-direction:column;border:1px solid #22262d;background:#111418;">
+          <div style="padding:20px;display:flex;flex-direction:column;gap:14px;min-height:220px;">
+            <sc-if value="{{ c.hasGear }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;gap:8px;">
+                <sc-for list="{{ c.armor }}" as="a" hint-placeholder-count="5">
+                  <div style="display:grid;grid-template-columns:44px minmax(0,1fr);gap:12px;align-items:center;">
+                    <div style="width:44px;height:44px;background:#1a1d22 url('{{ a.icon }}') center/cover;border:1px solid {{ a.border }};box-sizing:border-box;"></div>
+                    <div style="display:flex;flex-direction:column;gap:2px;min-width:0;">
+                      <span style="font-family:var(--fd),sans-serif;font-weight:600;font-size:16px;letter-spacing:.02em;text-transform:uppercase;color:{{ a.color }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ a.name }}</span>
+                      <span style="font-family:var(--fm),monospace;font-size:11px;color:#6b717b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ a.sub }}</span>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
+            <sc-if value="{{ c.noGear }}" hint-placeholder-val="{{ true }}">
+              <div style="flex:1;display:flex;align-items:center;justify-content:center;background:repeating-linear-gradient(45deg,#1a1d22 0 6px,#15181c 6px 12px);font-family:var(--fm),monospace;font-size:11px;color:#6b717b;min-height:200px;">{{ c.slot }}</div>
+            </sc-if>
+          </div>
+          <div style="padding:22px 20px;display:flex;justify-content:space-between;align-items:center;gap:12px;border-top:1px solid #22262d;background:linear-gradient(90deg,rgba(13,15,18,0) 0%,rgba(13,15,18,.2) 40%,rgba(13,15,18,.85) 100%),{{ c.bg }};">
+            <span style="font-family:var(--fd),sans-serif;font-weight:600;font-size:22px;text-transform:uppercase;letter-spacing:.04em;padding-left:76px;text-shadow:0 1px 3px rgba(0,0,0,.8);">{{ c.name }}</span>
+            <span style="font-family:var(--fm),monospace;font-size:13px;color:#e8e9ec;text-shadow:0 1px 3px rgba(0,0,0,.8);">{{ c.note }}</span>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <section id="plaques" style="max-width:1200px;margin:0 auto;padding:72px 32px 0;display:flex;flex-direction:column;gap:28px;">
+    <h2 style="margin:0;font-family:var(--fd),sans-serif;font-weight:600;font-size:40px;letter-spacing:.04em;text-transform:uppercase;">Plaques</h2>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;">
+      <sc-for list="{{ plaques }}" as="p" hint-placeholder-count="3">
+        <div style="border:1px solid oklch(0.82 0.13 85 / 0.5);background:#111418;padding:24px;display:flex;flex-direction:column;gap:20px;">
+          <div style="font-family:var(--fd),sans-serif;font-weight:700;font-size:28px;letter-spacing:.14em;text-transform:uppercase;color:oklch(0.82 0.13 85);">{{ p.title }}</div>
+          <sc-for list="{{ p.rows }}" as="row" hint-placeholder-count="1">
+            <div style="display:flex;flex-direction:column;gap:10px;padding-top:16px;border-top:1px solid #22262d;">
+              <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;">
+                <span style="font-family:var(--fd),sans-serif;font-size:14px;letter-spacing:.14em;text-transform:uppercase;color:#8a8f98;">{{ row.kind }}</span>
+                <span style="font-family:var(--fm),monospace;font-size:28px;font-weight:500;">{{ row.count }}<span style="color:#6b717b;font-size:16px;"> of {{ row.total }}</span></span>
+              </div>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                <sc-for list="{{ row.names }}" as="n" hint-placeholder-count="3">
+                  <a href="{{ n.href }}" style="font-family:var(--fd),sans-serif;font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:3px 8px;border:1px solid #2a2f37;color:#a9aeb6;transition:border-color .15s,color .15s,background .15s;" style-hover="border-color:oklch(0.82 0.13 85);color:#0d0f12;background:oklch(0.82 0.13 85);">{{ n.label }}</a>
+                </sc-for>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <sc-if value="{{ showFeed }}" hint-placeholder-val="{{ false }}">
+  <section id="activity" style="max-width:1200px;margin:0 auto;padding:72px 32px 0;display:flex;flex-direction:column;gap:28px;">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;gap:16px;flex-wrap:wrap;">
+      <h2 style="margin:0;font-family:var(--fd),sans-serif;font-weight:600;font-size:40px;letter-spacing:.04em;text-transform:uppercase;">Latest activity</h2>
+      <a href="{{ pgcrUrl }}" target="_blank" style="font-family:var(--fm),monospace;font-size:13px;color:#8a8f98;">All activity on pgcr.report ↗</a>
+    </div>
+    <div style="display:flex;flex-direction:column;border-top:1px solid #22262d;">
+      <sc-for list="{{ feed }}" as="f" hint-placeholder-count="8">
+        <a href="{{ f.href }}" target="_blank" style="display:grid;grid-template-columns:12px minmax(0,1fr) auto auto;gap:20px;align-items:center;padding:14px 12px;border-bottom:1px solid #22262d;transition:background .15s;" style-hover="background:#161a1f;">
+          <span style="width:9px;height:9px;border-radius:50%;background:{{ f.color }};"></span>
+          <span style="font-family:var(--fd),sans-serif;font-weight:600;font-size:20px;text-transform:uppercase;letter-spacing:.02em;">{{ f.name }}</span>
+          <span style="font-family:var(--fd),sans-serif;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:#8a8f98;">{{ f.kind }} · {{ f.status }}</span>
+          <span style="font-family:var(--fm),monospace;font-size:12px;color:#6b717b;">{{ f.meta }} ↗</span>
+        </a>
+      </sc-for>
+    </div>
+  </section>
+  </sc-if>
+
+  <sc-for list="{{ groups }}" as="g" hint-placeholder-count="2">
+    <section id="{{ g.id }}" style="max-width:1200px;margin:0 auto;padding:72px 32px 0;display:flex;flex-direction:column;gap:28px;">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;gap:16px;flex-wrap:wrap;">
+        <h2 style="margin:0;font-family:var(--fd),sans-serif;font-weight:600;font-size:40px;letter-spacing:.04em;text-transform:uppercase;">{{ g.title }}</h2>
+        <a href="{{ g.url }}" target="_blank" style="font-family:var(--fm),monospace;font-size:13px;color:#8a8f98;">{{ g.summary }} ↗</a>
+      </div>
+      <sc-if value="{{ isGrid }}" hint-placeholder-val="{{ true }}">
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:1px;">
+          <sc-for list="{{ g.items }}" as="r" hint-placeholder-count="6">
+            <div id="{{ r.anchor }}" style="scroll-margin-top:24px;background:{{ r.bg }};transition:background .6s;outline:1px solid #22262d;padding:24px;display:flex;flex-direction:column;gap:20px;min-height:170px;" style-hover="background:#161a1f;">
+              <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;">
+                <div style="font-family:var(--fd),sans-serif;font-weight:600;font-size:22px;line-height:1.1;text-transform:uppercase;letter-spacing:.02em;">{{ r.name }}</div>
+                <div style="font-family:var(--fm),monospace;font-size:28px;font-weight:500;line-height:1;">{{ r.clears }}</div>
+              </div>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                <sc-for list="{{ r.tags }}" as="t" hint-placeholder-count="1">
+                  <span style="font-family:var(--fd),sans-serif;font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;padding:3px 8px;border:1px solid {{ t.color }};color:{{ t.color }};">{{ t.label }}</span>
+                </sc-for>
+              </div>
+              <sc-if value="{{ r.hasDots }}" hint-placeholder-val="{{ true }}">
+                <div style="position:relative;height:36px;margin:0 5px;">
+                  <div style="position:absolute;left:-5px;right:-5px;top:0;border-top:1px dashed #2a2f37;"></div>
+                  <sc-for list="{{ r.dots }}" as="d" hint-placeholder-count="12">
+                    <a href="{{ d.href }}" target="_blank" title="{{ d.title }}" style="position:absolute;left:{{ d.x }}%;top:{{ d.y }}%;width:9px;height:9px;margin:-4.5px 0 0 -4.5px;border-radius:50%;background:{{ d.color }};transition:transform .15s;" style-hover="transform:scale(1.6);"></a>
+                  </sc-for>
+                </div>
+              </sc-if>
+              <div style="margin-top:auto;display:flex;justify-content:flex-end;gap:12px;font-family:var(--fm),monospace;font-size:12px;color:#8a8f98;">
+                <span style="color:{{ r.sherpaColor }};">{{ r.sherpas }} sherpas</span>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+      <sc-if value="{{ isList }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;border-top:1px solid #22262d;">
+          <sc-for list="{{ g.items }}" as="r" hint-placeholder-count="6">
+            <div id="{{ r.anchor }}" style="scroll-margin-top:24px;background:{{ r.bg }};transition:background .6s;display:grid;grid-template-columns:minmax(0,1fr) auto 160px 80px 60px;gap:24px;align-items:center;padding:16px 0;border-bottom:1px solid #22262d;">
+              <div style="font-family:var(--fd),sans-serif;font-weight:600;font-size:20px;text-transform:uppercase;letter-spacing:.02em;">{{ r.name }}</div>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;">
+                <sc-for list="{{ r.tags }}" as="t" hint-placeholder-count="1">
+                  <span style="font-family:var(--fd),sans-serif;font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;padding:3px 8px;border:1px solid {{ t.color }};color:{{ t.color }};">{{ t.label }}</span>
+                </sc-for>
+              </div>
+              <div><sc-if value="{{ r.hasDots }}" hint-placeholder-val="{{ true }}">
+                <div style="position:relative;height:24px;margin:0 5px;">
+                  <div style="position:absolute;left:-5px;right:-5px;top:0;border-top:1px dashed #2a2f37;"></div>
+                  <sc-for list="{{ r.dots }}" as="d" hint-placeholder-count="12">
+                    <a href="{{ d.href }}" target="_blank" title="{{ d.title }}" style="position:absolute;left:{{ d.x }}%;top:{{ d.y }}%;width:9px;height:9px;margin:-4.5px 0 0 -4.5px;border-radius:50%;background:{{ d.color }};transition:transform .15s;" style-hover="transform:scale(1.6);"></a>
+                  </sc-for>
+                </div>
+              </sc-if></div>
+              <div style="font-family:var(--fm),monospace;font-size:12px;color:{{ r.sherpaColor }};text-align:right;">{{ r.sherpas }} sh.</div>
+              <div style="font-family:var(--fm),monospace;font-size:22px;text-align:right;">{{ r.clears }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+    </section>
+  </sc-for>
+
+  </sc-if>
+  <footer style="max-width:1200px;margin:96px auto 0;padding:40px 32px 56px;border-top:1px solid #22262d;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-family:var(--fm),monospace;font-size:12px;color:#6b717b;">
+    <span>Live via Bungie API · Sherpas, full clears &amp; extra tags are entered per player in Edit plaques</span>
+    <span>{{ liveStatus }}</span>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;player&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;layout&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;grid&quot;,&quot;list&quot;],&quot;default&quot;:&quot;grid&quot;,&quot;tsType&quot;:&quot;'grid'|'list'&quot;},&quot;sort&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;release&quot;,&quot;clears&quot;],&quot;default&quot;:&quot;clears&quot;,&quot;tsType&quot;:&quot;'release'|'clears'&quot;},&quot;showMissions&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;},&quot;showFeed&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;},&quot;feedCount&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;min&quot;:5,&quot;max&quot;:30,&quot;step&quot;:1,&quot;default&quot;:10,&quot;tsType&quot;:&quot;number&quot;},&quot;dotCount&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;min&quot;:5,&quot;max&quot;:40,&quot;step&quot;:1,&quot;default&quot;:15,&quot;tsType&quot;:&quot;number&quot;},&quot;font&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;barlow&quot;,&quot;space&quot;],&quot;default&quot;:&quot;space&quot;,&quot;tsType&quot;:&quot;'barlow'|'space'&quot;}}">
+class Component extends DCLogic {
+  state = {};
+  applyFont() { document.body.dataset.font = this.props.font ?? 'space'; }
+  componentDidMount() {
+    this.applyFont();
+    const wait = () => window.GL ? GL.ready.then(() => { this.setState({ auth: GL.auth() }); this.init(); }) : setTimeout(wait, 50);
+    wait();
+    this.onHash = () => {
+      const id = decodeURIComponent(location.hash.slice(1));
+      if (!id) return;
+      this.setState({ flash: id });
+      clearTimeout(this.t);
+      this.t = setTimeout(() => this.setState({ flash: null }), 1200);
+    };
+    window.addEventListener('hashchange', this.onHash);
+    document.addEventListener('click', this.onClick = e => {
+      const a = e.target.closest && e.target.closest('a[href^="#"]');
+      if (a && a.getAttribute('href') === location.hash) this.onHash();
+    });
+  }
+  async init() {
+    let p;
+    try { p = await GL.resolve(GL.parse(this.props.player)); } catch (e) { return this.setState({ noPlayer: true, notFound: true }); }
+    if (!p) return this.setState({ noPlayer: true });
+    this.P = p;
+    this.setState({ player: p, noPlayer: false });
+    try { const c = JSON.parse(localStorage.getItem(GL.k(p.id, 'live'))); if (c) this.setState({ stats: c }); } catch (e) {}
+    if (p.id === GL.OWNER) fetch('./timelines.json').then(r => r.json()).then(tl => this.setState({ tl })).catch(() => {});
+    window.addEventListener('storage', this.onStorage = e => { if (e.key === GL.k(p.id, 'profile')) this.loadData(); });
+    await this.loadData();
+    this.loadBungie();
+    this.loadStats();
+  }
+  async loadData() {
+    const id = this.P.id;
+    const remote = await GL.loadEdits(id);
+    if (remote) return this.setState({ data: remote });
+    try {
+      let s = localStorage.getItem(GL.k(id, 'profile'));
+      if (!s && id === GL.OWNER) s = localStorage.getItem('ludgar-profile');
+      if (s) return this.setState({ data: JSON.parse(s) });
+    } catch (e) {}
+    if (!this.base) this.base = await fetch('./profile.json').then(r => r.json()).catch(() => null);
+    if (this.base) this.setState({ data: id === GL.OWNER ? this.base : GL.blank(this.base) });
+  }
+  async loadBungie() {
+    const { type: MT, id: MID } = this.P, api = GL.api;
+    try {
+      const prof = await api(`/Destiny2/${MT}/Profile/${MID}/?components=100,200,900,1400`);
+      const chars = Object.values(prof.characters.data).sort((a, b) => new Date(b.dateLastPlayed) - new Date(a.dateLastPlayed));
+      const ui = (prof.profile && prof.profile.data && prof.profile.data.userInfo) || {};
+      const name = ui.bungieGlobalDisplayName || ui.displayName || 'Guardian';
+      const code = ui.bungieGlobalDisplayNameCode != null ? String(ui.bungieGlobalDisplayNameCode).padStart(4, '0') : '';
+      const rec = (prof.profileRecords && prof.profileRecords.data) || {};
+      const triumph = rec.lifetimeScore ?? rec.score ?? null;
+      const gr = prof.profile && prof.profile.data ? prof.profile.data.currentGuardianRank : null;
+      const cm = (prof.profileCommendations && prof.profileCommendations.data) || null;
+      let commend = null;
+      if (cm) {
+        const FALL = ['#e8a33d', '#4fa3e8', '#e85fa3', '#5fd18a'];
+        const parts = await Promise.all(Object.entries(cm.commendationNodePercentagesByHash || {}).map(async ([hs, pct], i) => {
+          const d = await api(`/Destiny2/Manifest/DestinySocialCommendationNodeDefinition/${hs}/`).catch(() => null);
+          const col = d && d.color ? `rgb(${d.color.red},${d.color.green},${d.color.blue})` : FALL[i % 4];
+          return { name: d ? d.displayProperties.name : '', pct, color: col };
+        }));
+        commend = { total: cm.totalScore, parts };
+      }
+      const base = { chars, triumph, commend, gr, name, code };
+      this.setState({ live: base, liveErr: null });
+      GL.register(this.P, name + (code ? '#' + code : '')).then(serial => { if (serial) this.setState({ serial }); });
+      this.loadGear();
+      const lists = await Promise.all(chars.flatMap(c => [4, 82].map(mode =>
+        api(`/Destiny2/${MT}/Account/${MID}/Character/${c.characterId}/Stats/Activities/?count=30&mode=${mode}`).then(r => (r.activities || []).map(a => ({ ...a, mode, cls: c.classType }))).catch(() => []))));
+      const acts = lists.flat().sort((a, b) => new Date(b.period) - new Date(a.period)).slice(0, 30);
+      const hashes = [...new Set(acts.map(a => a.activityDetails.referenceId))];
+      const names = {};
+      await Promise.all(hashes.map(hs => api(`/Destiny2/Manifest/DestinyActivityDefinition/${hs}/`).then(d => { names[hs] = d.displayProperties.name; }).catch(() => {})));
+      this.setState({ live: { ...base, acts, names } });
+    } catch (e) {
+      console.warn('Bungie API:', e.message);
+      this.setState({ liveErr: e.message });
+    }
+  }
+  async loadGear() {
+    const { type: MT, id: MID } = this.P, api = GL.api;
+    try {
+      const BUCKETS = [3448274439, 3551918588, 14239492, 20886954, 1585787867];
+      const SLOT = ['Helmet', 'Arms', 'Chest', 'Legs', 'Class item'];
+      const r = await api(`/Destiny2/${MT}/Profile/${MID}/?components=205,305`);
+      let defs = {}; try { defs = JSON.parse(localStorage.getItem('ludgar-items')) || {}; } catch (e) {}
+      const need = new Set();
+      const gear = {};
+      for (const [cid, eq] of Object.entries(r.characterEquipment.data)) {
+        gear[cid] = BUCKETS.map((b, si) => {
+          const it = eq.items.find(x => x.bucketHash === b); if (!it) return null;
+          const plugs = ((r.itemComponents.sockets.data[it.itemInstanceId] || {}).sockets || []).map(s => s.plugHash).filter(Boolean);
+          need.add(it.itemHash); if (it.overrideStyleItemHash) need.add(it.overrideStyleItemHash); plugs.forEach(x => need.add(x));
+          return { slot: SLOT[si], hash: it.itemHash, orn: it.overrideStyleItemHash, plugs };
+        }).filter(Boolean);
+      }
+      const todo = [...need].filter(x => !(x in defs));
+      let i = 0;
+      await Promise.all(Array.from({ length: 8 }, async () => { while (i < todo.length) { const x = todo[i++]; const d = await api(`/Destiny2/Manifest/DestinyInventoryItemDefinition/${x}/`).catch(() => null); defs[x] = d ? { n: d.displayProperties.name, i: d.displayProperties.icon, t: d.inventory && d.inventory.tierType, s: d.itemSubType, c: d.plug && d.plug.plugCategoryIdentifier } : null; } }));
+      try { localStorage.setItem('ludgar-items', JSON.stringify(defs)); } catch (e) {}
+      const out = {};
+      for (const [cid, list] of Object.entries(gear)) {
+        out[cid] = list.map(g => {
+          const base = defs[g.hash] || {}, orn = g.orn && defs[g.orn];
+          const shader = g.plugs.map(x => defs[x]).find(d => d && (d.s === 20 || d.c === 'shader'));
+          return { name: base.n || g.slot, icon: 'https://www.bungie.net' + ((orn && orn.i) || base.i || ''), exotic: base.t === 6, sub: [orn && orn.n && orn.n !== base.n ? orn.n : '', shader ? shader.n : ''].filter(Boolean).join(' · ') };
+        });
+      }
+      this.setState({ gear: out });
+    } catch (e) { console.warn('Gear:', e.message); }
+  }
+  async loadStats() {
+    const { type: MT, id: MID } = this.P, api = GL.api, get = GL.get;
+    const load = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) || d; } catch (e) { return d; } };
+    const save = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
+    const pool = async (items, n, fn) => { let i = 0; await Promise.all(Array.from({ length: n }, async () => { while (i < items.length) { const it = items[i++]; await fn(it); } })); };
+    const defs = load('ludgar-defs', {}), pg = load('ludgar-pgcr2', {});
+    const liveKey = GL.k(MID, 'live');
+    try {
+      this.setState({ statsMsg: 'Loading activity history…' });
+      let cids = [];
+      try { const acct = await api(`/Destiny2/${MT}/Account/${MID}/Stats/`); cids = (acct.characters || []).map(c => c.characterId); } catch (e) {}
+      if (!cids.length) { const prof = await api(`/Destiny2/${MT}/Profile/${MID}/?components=200`); cids = Object.keys(prof.characters.data); }
+      const runs = new Map();
+      await Promise.all(cids.flatMap(cid => [4, 82].map(async mode => {
+        for (let page = 0; page < 40; page++) {
+          const r = await api(`/Destiny2/${MT}/Account/${MID}/Character/${cid}/Stats/Activities/?count=250&mode=${mode}&page=${page}`).catch(() => null);
+          const a = (r && r.activities) || [];
+          a.forEach(x => runs.set(x.activityDetails.instanceId, x));
+          if (a.length < 250) break;
+        }
+      })));
+      const hashes = [...new Set([...runs.values()].map(r => r.activityDetails.referenceId))].filter(x => !(x in defs));
+      await pool(hashes, 8, async x => { const d = await api(`/Destiny2/Manifest/DestinyActivityDefinition/${x}/`).catch(() => null); defs[x] = d ? ((d.originalDisplayProperties && d.originalDisplayProperties.name) || d.displayProperties.name || '') : ''; });
+      save('ludgar-defs', defs);
+      const D = this.state.data || this.base || {};
+      const known = [...(D.raids || []), ...(D.dungeons || [])].map(r => [r[0], r[0].toLowerCase().replace(/[’‘]/g, "'").replace(/^the /, '')]).sort((a, b) => b[1].length - a[1].length);
+      const match = s => { const n = (s || '').toLowerCase().replace(/[’‘]/g, "'"); const k = known.find(([, kn]) => n.includes(kn)); return k && k[0]; };
+      const ok = r => r.values.completed?.basic.value === 1 && r.values.completionReason?.basic.value === 0;
+      const raidNames = new Set((D.raids || []).map(r => r[0]));
+      const byName = {};
+      for (const r of runs.values()) { const name = match(defs[r.activityDetails.referenceId]); if (name) (byName[name] = byName[name] || []).push(r); }
+      const tl = {};
+      for (const [name, list] of Object.entries(byName)) {
+        const last = list.sort((a, b) => new Date(a.period) - new Date(b.period)).slice(-(this.props.dotCount ?? 15));
+        const durs = last.map(r => r.values.activityDurationSeconds?.basic.value || 0), mn = Math.min(...durs), mx = Math.max(...durs), n = last.length;
+        tl[name] = { base: raidNames.has(name) ? 'https://raid.report' : 'https://dungeon.report', dots: last.map((r, i) => [n === 1 ? 50 : Math.round(i / (n - 1) * 1000) / 10, mx === mn ? 50 : Math.round((durs[i] - mn) / (mx - mn) * 1000) / 10, ok(r) ? 1 : 0, r.activityDetails.instanceId, new Date(r.period).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) + ' · ' + (r.values.activityDurationSeconds?.basic.displayValue || '')]) };
+      }
+      const clears = {}, cands = [];
+      for (const r of runs.values()) {
+        const name = match(defs[r.activityDetails.referenceId]);
+        if (!name || !ok(r)) continue;
+        clears[name] = (clears[name] || 0) + 1;
+        const pc = r.values.playerCount?.basic.value ?? 6, dt = r.values.deaths?.basic.value ?? 1;
+        if (pc <= 3 || dt === 0) cands.push([r.activityDetails.instanceId, name]);
+      }
+      const comp = {};
+      const tally = () => { for (const k in comp) delete comp[k]; for (const [id, name] of cands) { const s = pg[id]; if (!s) continue; const [fresh, pl, clean] = s; const c = comp[name] = comp[name] || {}; if (!fresh) continue; if (pl <= 3) c.low = Math.min(c.low || 9, pl); if (clean) { c.flaw = 1; if (pl <= 3) c.flawLow = Math.min(c.flawLow || 9, pl); } } };
+      const todo = cands.filter(([id]) => !pg[id]);
+      let done = cands.length - todo.length;
+      const push = final => { tally(); const st = { clears, tl, comp: JSON.parse(JSON.stringify(comp)), at: Date.now(), complete: final }; this.setState({ stats: st, statsMsg: final ? '' : `Analyzing runs ${done}/${cands.length}…` }); if (final) save(liveKey, st); };
+      push(todo.length === 0);
+      let n = 0;
+      await pool(todo, 6, async ([id]) => {
+        const g = await get(`https://stats.bungie.net/Platform/Destiny2/Stats/PostGameCarnageReport/${id}/`).catch(() => null);
+        if (g) {
+          const fresh = g.activityWasStartedFromBeginning === undefined ? (g.startingPhaseIndex === 0 ? 1 : 0) : (g.activityWasStartedFromBeginning ? 1 : 0);
+          const pl = new Set(g.entries.map(e => e.player.destinyUserInfo.membershipId)).size;
+          const clean = g.entries.every(e => (e.values.deaths?.basic.value || 0) === 0) ? 1 : 0;
+          pg[id] = [fresh, pl, clean];
+        }
+        done++;
+        if (++n % 25 === 0) { save('ludgar-pgcr2', pg); push(false); }
+      });
+      save('ludgar-pgcr2', pg);
+      push(true);
+    } catch (e) {
+      console.warn('Stats:', e.message);
+      this.setState({ statsMsg: '' });
+    }
+  }
+  componentWillUnmount() { if (this.onStorage) window.removeEventListener('storage', this.onStorage); window.removeEventListener('hashchange', this.onHash); document.removeEventListener('click', this.onClick); }
+  componentDidUpdate() { this.applyFont(); }
+  renderVals() {
+    const layout = this.props.layout ?? 'grid';
+    const showMissions = this.props.showMissions ?? true;
+    const sort = this.props.sort ?? 'release';
+    const G = window.GL, pl = this.state.player, L = this.state.live;
+    const D = this.state.data || { raids: [], dungeons: [], missions: [], profile: {} };
+    const raids = D.raids.map(r => r.slice()), dungeons = D.dungeons.map(r => r.slice()), missions = D.missions.map(r => r.slice());
+    const P = D.profile || {};
+    const S = this.state.stats;
+    if (S) {
+      const LBL = { 1: 'Solo', 2: 'Duo', 3: 'Trio' };
+      const parse = tags => { const c = {}; tags.forEach(t => { const m = /Solo/.test(t) ? 1 : /Duo/.test(t) ? 2 : /Trio/.test(t) ? 3 : 0; if (m) c.low = Math.min(c.low || 9, m); if (/Flawless/.test(t)) { c.flaw = 1; if (m) c.flawLow = Math.min(c.flawLow || 9, m); } }); return c; };
+      const rebuild = (tags, live) => {
+        const c = parse(tags), l = live || {};
+        const low = Math.min(c.low || 9, l.low || 9), flawLow = Math.min(c.flawLow || 9, l.flawLow || 9), flaw = c.flaw || l.flaw;
+        const out = tags.filter(t => !/Solo|Duo|Trio|Flawless/.test(t));
+        if (low < 9 && low < flawLow) out.push(LBL[low]);
+        if (flawLow < 9) out.push(flawLow === 1 ? 'Solo Flawless' : 'Flawless ' + LBL[flawLow]);
+        else if (flaw) out.push('Flawless');
+        return out;
+      };
+      [raids, dungeons].forEach(arr => arr.forEach((r, i) => {
+        arr[i] = [r[0], S.clears[r[0]] ?? r[1], rebuild(r[2], S.comp[r[0]]), r[3], r[4]];
+      }));
+    }
+    const gold = 'oklch(0.82 0.13 85)';
+    const slug = s => s.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    const flash = this.state.flash;
+    const map = arr => {
+      const out = arr.map(([name, clears, tags, fastest, sherpas]) => ({
+        name, clears, fastest, sherpas, anchor: slug(name),
+        ...(() => { const t = (S && S.tl || {})[name] || (this.state.tl || {})[name]; const dots = t ? t.dots.map(([x, y, ok, id, lbl]) => ({ x, y, color: ok ? 'oklch(0.72 0.14 150)' : 'oklch(0.64 0.18 25)', href: t.base + '/pgcr/' + id, title: (lbl ? lbl + ' · ' : '') + (ok ? 'Completed' : 'Incomplete') })) : []; return { dots, hasDots: dots.length > 0 }; })(),
+        bg: flash === slug(name) ? '#2a2618' : '#111418',
+        sherpaColor: sherpas >= 10 ? gold : '#8a8f98',
+        tags: tags.map(label => ({ label, color: /Flawless|Solo|Duo|Trio/.test(label) ? gold : '#a9aeb6' }))
+      }));
+      return sort === 'clears' ? out.sort((a, b) => b.clears - a.clears) : out;
+    };
+    const sum = (arr, i) => arr.reduce((a, r) => a + (+r[i] || 0), 0);
+    const sherpaTotal = sum(raids, 4) + sum(dungeons, 4) + sum(missions, 4);
+    const summary = arr => `${sum(arr, 1)} clears` + (sum(arr, 4) ? ` · ${sum(arr, 4)} sherpas` : '');
+    const has = (arr, re) => arr.filter(r => r[2].some(t => re.test(t))).map(r => ({ label: r[0], href: '#' + slug(r[0]) }));
+    const row = (kind, arr, names) => ({ kind, count: names.length, total: arr.length, names });
+    const plaques = [
+      { title: 'Raid', rows: [row('Trio', raids, has(raids, /Trio|Duo|Solo/)), row('Flawless', raids, has(raids, /Flawless/))] },
+      { title: 'Dungeon', rows: [row('Solo', dungeons, has(dungeons, /Solo/)), row('Flawless', dungeons, has(dungeons, /Flawless/))] },
+      { title: 'Exotic', rows: [row('Solo', missions, has(missions, /Solo/)), row('Flawless', missions, has(missions, /Flawless/))] }
+    ];
+    const raidUrl = G ? G.reportUrl('raid', pl) : '#', dungeonUrl = G ? G.reportUrl('dungeon', pl) : '#';
+    const groups = [{ id: 'raids', title: 'Raids', summary: summary(raids), url: raidUrl, items: map(raids) }];
+    groups.push({ id: 'dungeons', title: 'Dungeons', summary: summary(dungeons), url: dungeonUrl, items: map(dungeons) });
+    if (showMissions) groups.push({ id: 'missions', title: 'Exotic missions', summary: summary(missions), url: dungeonUrl, items: map(missions) });
+    const power = L ? '✦' + Math.max(...L.chars.map(c => c.light)) : '—';
+    const emblemPath = L && L.chars[0] ? L.chars[0].emblemBackgroundPath : '';
+    const displayName = L ? L.name : pl ? 'Loading…' : '';
+    if (pl && G && L) {
+      try {
+        localStorage.setItem(G.k(pl.id, 'card'), JSON.stringify({
+          name: L.name, code: L.code, emblem: emblemPath, raidUrl, serial: this.state.serial || null,
+          raidClears: sum(raids, 1), dungeonClears: sum(dungeons, 1), fullRaidClears: P.fullRaidClears ?? null, sherpas: sherpaTotal,
+          power, triumph: L.triumph ?? null, commend: L.commend ?? null, gr: L.gr ?? null,
+          acts: { raids: raids.map(r => [r[0], r[1], r[2]]), dungeons: dungeons.map(r => [r[0], r[1], r[2]]), missions: missions.map(r => [r[0], r[1], r[2]]) }
+        }));
+      } catch (e) {}
+    }
+    const q = G && pl ? G.qs(pl) : '';
+    return {
+      noPlayer: !!this.state.noPlayer,
+      hasPlayer: !this.state.noPlayer,
+      emptyKicker: this.state.notFound ? 'Guardian not found' : 'No Guardian selected',
+      displayName,
+      platformLine: pl && G ? ((G.PLAT[pl.type] || {}).label || 'Bungie') + (L && L.code ? ' · ' + L.name + '#' + L.code : '') : '',
+      emblemBg: emblemPath ? `#15181c url('https://www.bungie.net${emblemPath}') center / cover no-repeat` : '#15181c',
+      editHref: './Profile Data Editor.dc.html' + q,
+      canEdit: !!(G && pl && this.state.auth && G.isOwner(pl)),
+      showSignIn: !!(G && pl && !this.state.auth && G.canLogin()),
+      signIn: () => G && G.login(location.href),
+      cardHref: './Guardian Share Card.dc.html' + q,
+      raidUrl, dungeonUrl,
+      pgcrUrl: pl ? `https://pgcr.report/@${pl.id}/${pl.type}` : 'https://pgcr.report',
+      copyLabel: this.state.copied ? 'Link copied' : 'Copy link',
+      copyLink: () => {
+        const url = location.origin + location.pathname + q;
+        (navigator.clipboard ? navigator.clipboard.writeText(url) : Promise.reject()).catch(() => {}).finally(() => { this.setState({ copied: true }); setTimeout(() => this.setState({ copied: false }), 1500); });
+      },
+      ranks: [
+        { label: 'Power', value: power },
+        { label: 'Guardian rank', value: L && L.gr != null ? String(L.gr) : '—' },
+        { label: 'Triumph score', value: L && L.triumph != null ? Number(L.triumph).toLocaleString('en-US') : '—' },
+        { label: 'Sherpas', value: sherpaTotal ? String(sherpaTotal) : '—' }
+      ],
+      liveStatus: this.state.statsMsg ? this.state.statsMsg : L ? 'Live · Bungie API' : this.state.liveErr ? 'Bungie API unavailable' : 'Loading…',
+      characters: L ? L.chars.map((c, i) => ({
+        name: ['Titan', 'Hunter', 'Warlock'][c.classType],
+        note: '✦' + c.light + (i === 0 ? ' · Last played' : ''),
+        slot: 'Loading gear…',
+        hasGear: !!(this.state.gear && this.state.gear[c.characterId]),
+        noGear: !(this.state.gear && this.state.gear[c.characterId]),
+        armor: ((this.state.gear || {})[c.characterId] || []).map(a => ({ ...a, color: a.exotic ? gold : '#e8e9ec', border: a.exotic ? gold : '#2a2f37' })),
+        bg: `#15181c url('https://www.bungie.net${c.emblemBackgroundPath}') left center / cover no-repeat`
+      })) : [],
+      plaques,
+      showFeed: this.props.showFeed ?? true,
+      feed: (() => {
+        if (L && L.acts) return L.acts.slice(0, this.props.feedCount ?? 10).map(a => {
+          const v = a.values, ok = v.completed?.basic.value === 1 && v.completionReason?.basic.value === 0;
+          const name = L.names[a.activityDetails.referenceId] || 'Activity';
+          return { name, id: a.activityDetails.instanceId, kind: a.mode === 4 ? 'Raid' : 'Dungeon', status: ok ? 'Completed' : 'Incomplete', color: ok ? 'oklch(0.72 0.14 150)' : 'oklch(0.64 0.18 25)', href: 'https://pgcr.report/' + a.activityDetails.instanceId,
+            meta: new Date(a.period).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + ' · ' + (v.activityDurationSeconds?.basic.displayValue || '') };
+        });
+        return [];
+      })(),
+      groups,
+      isGrid: layout === 'grid',
+      isList: layout === 'list'
+    };
+  }
+}
+</script>
+</body>
+</html>

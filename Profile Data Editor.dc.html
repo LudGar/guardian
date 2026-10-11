@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#0d0f12;color:#e8e9ec;font-family:'Space Grotesk',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:#e8e9ec;text-decoration:none}a:hover{color:oklch(0.82 0.13 85)}
+</style>
+<script src="./guardian.js"></script>
+</helmet>
+<div style="max-width:1000px;margin:0 auto;padding:32px;display:flex;flex-direction:column;gap:36px;">
+  <header style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;">
+    <div style="display:flex;flex-direction:column;gap:6px;">
+      <a href="{{ backHref }}" style="font-family:'Space Mono',monospace;font-size:12px;color:#8a8f98;">← Back to {{ who }}</a>
+      <h1 style="margin:0;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:44px;text-transform:uppercase;">Edit plaques</h1>
+      <p style="margin:0;font-size:14px;color:#8a8f98;max-width:560px;">Clears, characters and timelines are live. Add your sherpas, full clears and any tags the live check missed. Saved in this browser only.</p>
+    </div>
+    <sc-if value="{{ canEdit }}" hint-placeholder-val="{{ false }}">
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+      <span style="font-family:'Space Mono',monospace;font-size:12px;color:{{ statusColor }};">{{ status }}</span>
+      <button onClick="{{ save }}" style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:14px;letter-spacing:.12em;text-transform:uppercase;padding:10px 18px;background:oklch(0.82 0.13 85);color:#0d0f12;border:0;cursor:pointer;">Save</button>
+      <button onClick="{{ exportJson }}" style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:14px;letter-spacing:.12em;text-transform:uppercase;padding:10px 18px;background:none;color:#e8e9ec;border:1px solid #2a2f37;cursor:pointer;">Export</button>
+      <label style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:14px;letter-spacing:.12em;text-transform:uppercase;padding:10px 18px;border:1px solid #2a2f37;cursor:pointer;">Import<input type="file" accept=".json" onChange="{{ importJson }}" style="display:none;"></label>
+      <button onClick="{{ reset }}" style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:14px;letter-spacing:.12em;text-transform:uppercase;padding:10px 18px;background:none;color:#8a8f98;border:1px solid #2a2f37;cursor:pointer;">Reset</button>
+    </div>
+    </sc-if>
+  </header>
+
+  <sc-if value="{{ needLogin }}" hint-placeholder-val="{{ false }}">
+    <div style="display:flex;flex-direction:column;align-items:flex-start;gap:16px;padding:32px;border:1px solid #2a2f37;background:#111418;">
+      <span style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:22px;text-transform:uppercase;">Sign in to edit</span>
+      <span style="font-size:15px;color:#a9aeb6;max-width:520px;">Only the owner of this Guardian can edit its plaques. Sign in with the Bungie.net account it belongs to.</span>
+      <button onClick="{{ signIn }}" style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:14px;letter-spacing:.12em;text-transform:uppercase;padding:12px 20px;background:oklch(0.82 0.13 85);color:#0d0f12;border:0;cursor:pointer;">Sign in with Bungie</button>
+    </div>
+  </sc-if>
+  <sc-if value="{{ notOwner }}" hint-placeholder-val="{{ false }}">
+    <div style="display:flex;flex-direction:column;align-items:flex-start;gap:16px;padding:32px;border:1px solid oklch(0.64 0.18 25 / .6);background:#111418;">
+      <span style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:22px;text-transform:uppercase;">Not your Guardian</span>
+      <span style="font-size:15px;color:#a9aeb6;">You're signed in as {{ meName }}. You can only edit your own Guardian.</span>
+      <a href="{{ meHref }}" style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:14px;letter-spacing:.12em;text-transform:uppercase;padding:12px 20px;border:1px solid #2a2f37;">Go to my profile</a>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ noPlayer }}" hint-placeholder-val="{{ false }}">
+    <a href="./Guardian Search.dc.html" style="align-self:flex-start;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:15px;letter-spacing:.14em;text-transform:uppercase;padding:14px 24px;background:oklch(0.82 0.13 85);color:#0d0f12;">Pick a Guardian first</a>
+  </sc-if>
+
+  <sc-if value="{{ canEdit }}" hint-placeholder-val="{{ false }}">
+    <section style="display:flex;flex-direction:column;gap:8px;">
+      <h2 style="margin:0 0 8px;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:26px;text-transform:uppercase;letter-spacing:.04em;">Share card</h2>
+      <label style="display:grid;grid-template-columns:minmax(160px,220px) 160px minmax(0,1fr);gap:16px;align-items:center;padding:10px 0;border-top:1px solid #22262d;">
+        <span style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:16px;text-transform:uppercase;">Full raid clears</span>
+        <input type="number" value="{{ fullRaidClears }}" onChange="{{ setFull }}" style="font-family:'Space Mono',monospace;font-size:15px;color:#e8e9ec;background:#0d0f12;border:1px solid #2a2f37;padding:8px 10px;width:100%;box-sizing:border-box;">
+        <span style="font-size:13px;color:#6b717b;">Copy from raid.report. Bungie doesn't mark full vs checkpoint runs.</span>
+      </label>
+    </section>
+  </sc-if>
+
+  <sc-for list="{{ groups }}" as="g" hint-placeholder-count="3">
+    <section style="display:flex;flex-direction:column;gap:4px;">
+      <div style="display:grid;grid-template-columns:minmax(160px,220px) 90px minmax(0,1fr);gap:16px;align-items:end;margin-bottom:8px;">
+        <h2 style="margin:0;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:26px;text-transform:uppercase;letter-spacing:.04em;">{{ g.title }}</h2>
+        <span style="font-family:'Space Grotesk',sans-serif;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#6b717b;">Sherpas</span>
+        <span style="font-family:'Space Grotesk',sans-serif;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#6b717b;">Tags</span>
+      </div>
+      <sc-for list="{{ g.rows }}" as="r" hint-placeholder-count="6">
+        <div style="display:grid;grid-template-columns:minmax(160px,220px) 90px minmax(0,1fr);gap:16px;align-items:center;padding:10px 0;border-top:1px solid #22262d;">
+          <span style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:16px;text-transform:uppercase;">{{ r.name }}</span>
+          <input type="number" min="0" value="{{ r.sherpas }}" onChange="{{ r.setSherpas }}" style="font-family:'Space Mono',monospace;font-size:14px;color:#e8e9ec;background:#0d0f12;border:1px solid #2a2f37;padding:6px 8px;width:100%;box-sizing:border-box;">
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <sc-for list="{{ r.opts }}" as="o" hint-placeholder-count="5">
+              <button onClick="{{ o.toggle }}" style="font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:6px 10px;cursor:pointer;border:1px solid {{ o.border }};background:{{ o.bg }};color:{{ o.color }};">{{ o.label }}</button>
+            </sc-for>
+          </div>
+        </div>
+      </sc-for>
+    </section>
+  </sc-for>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;player&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  state = { data: null, status: '', dirty: false };
+  OPTS = ['Trio', 'Duo', 'Solo', 'Flawless', 'Flawless Trio', 'Flawless Duo', 'Solo Flawless', 'Day One', 'Week One'];
+  componentDidMount() {
+    const wait = async () => {
+      if (!window.GL) return setTimeout(wait, 50);
+      let p = null;
+      try { p = await GL.resolve(GL.parse(this.props.player)); } catch (e) {}
+      if (!p) return this.setState({ noPlayer: true });
+      this.P = p; this.KEY = GL.k(p.id, 'profile');
+      await GL.ready;
+      const a = GL.auth();
+      this.setState({ player: p, auth: a });
+      if (!a) return this.setState({ needLogin: true });
+      if (!GL.isOwner(p)) return this.setState({ notOwner: true });
+      this.setState({ canEdit: true });
+      const remote = await GL.loadEdits(p.id);
+      if (remote) return this.setState({ data: remote, status: 'Loaded shared data' });
+      try {
+        let s = localStorage.getItem(this.KEY);
+        if (!s && p.id === GL.OWNER) s = localStorage.getItem('ludgar-profile');
+        if (s) return this.setState({ data: JSON.parse(s), status: 'Loaded saved data' });
+      } catch (e) {}
+      this.loadFile();
+    };
+    wait();
+  }
+  loadFile() {
+    fetch('./profile.json').then(r => r.json()).then(base => this.setState({ data: this.P.id === GL.OWNER ? base : GL.blank(base), status: 'Loaded defaults', dirty: false }));
+  }
+  update(fn) { this.setState(s => { const d = JSON.parse(JSON.stringify(s.data)); fn(d); return { data: d, dirty: true, status: 'Unsaved changes' }; }); }
+  renderVals() {
+    const d = this.state.data || { raids: [], dungeons: [], missions: [], profile: {} };
+    const gold = 'oklch(0.82 0.13 85)';
+    const q = window.GL && this.P ? GL.qs(this.P) : '';
+    const grp = (title, key) => ({
+      title,
+      rows: d[key].map((r, i) => ({
+        name: r[0],
+        sherpas: r[4] || 0,
+        setSherpas: e => { const v = Math.max(0, +e.target.value || 0); this.update(x => { x[key][i][4] = v; }); },
+        opts: this.OPTS.map(label => {
+          const on = r[2].includes(label);
+          return { label, bg: on ? gold : 'transparent', color: on ? '#0d0f12' : '#8a8f98', border: on ? gold : '#2a2f37',
+            toggle: () => this.update(x => { const t = x[key][i][2]; const j = t.indexOf(label); if (j >= 0) t.splice(j, 1); else t.push(label); }) };
+        })
+      }))
+    });
+    return {
+      noPlayer: !!this.state.noPlayer,
+      canEdit: !!this.state.canEdit,
+      needLogin: !!this.state.needLogin,
+      notOwner: !!this.state.notOwner,
+      meName: this.state.auth ? this.state.auth.name : '',
+      meHref: this.state.auth && this.state.auth.me && window.GL ? GL.landing(this.state.auth.me) : './Guardian Search.dc.html',
+      signIn: () => GL.login(location.href),
+      who: this.state.noPlayer ? 'search' : 'profile',
+      backHref: this.state.noPlayer ? './Guardian Search.dc.html' : './Guardian Landing.dc.html' + q,
+      status: this.state.status,
+      statusColor: this.state.dirty ? gold : '#8a8f98',
+      fullRaidClears: (d.profile && d.profile.fullRaidClears) ?? '',
+      setFull: e => { const v = e.target.value === '' ? null : +e.target.value || 0; this.update(x => { x.profile = x.profile || {}; x.profile.fullRaidClears = v; }); },
+      groups: !this.state.canEdit ? [] : [grp('Raids', 'raids'), grp('Dungeons', 'dungeons'), grp('Exotic missions', 'missions')],
+      save: async () => {
+        if (!this.KEY || !this.state.canEdit) return;
+        localStorage.setItem(this.KEY, JSON.stringify(d));
+        try {
+          this.setState({ status: 'Saving…' });
+          const shared = await GL.saveEdits(this.P.id, d);
+          this.setState({ dirty: false, status: shared ? 'Saved · visible to everyone' : 'Saved in this browser' });
+        } catch (err) { this.setState({ status: err.message }); }
+      },
+      exportJson: () => {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(new Blob([JSON.stringify(d, null, 1)], { type: 'application/json' }));
+        a.download = 'guardian-' + (this.P ? this.P.id : 'data') + '.json'; a.click();
+      },
+      importJson: e => {
+        const f = e.target.files[0]; if (!f) return;
+        f.text().then(t => { try { this.setState({ data: JSON.parse(t), dirty: true, status: 'Imported · press Save' }); } catch (err) { this.setState({ status: 'Invalid file' }); } });
+      },
+      reset: () => { if (this.KEY) localStorage.removeItem(this.KEY); if (this.P) this.loadFile(); }
+    };
+  }
+}
+</script>
+</body>
+</html>
