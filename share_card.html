@@ -20,7 +20,7 @@ a{color:#e8e9ec;text-decoration:none}a:hover{color:oklch(0.82 0.13 85)}
 </helmet>
 <div style="min-height:100vh;background:#0d0f12;display:flex;flex-direction:column;align-items:safe center;">
 <header style="box-sizing:border-box;width:100%;max-width:1200px;padding:28px 32px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;">
-  <a href="./Guardian Search.dc.html" style="font-family:var(--fm),monospace;font-size:12px;letter-spacing:.14em;color:#8a8f98;text-transform:uppercase;text-decoration:none;">← Search{{ platformLine }}</a>
+  <a href="./search.html" style="font-family:var(--fm),monospace;font-size:12px;letter-spacing:.14em;color:#8a8f98;text-transform:uppercase;text-decoration:none;">← Search{{ platformLine }}</a>
   <nav style="display:flex;gap:24px;flex-wrap:wrap;align-items:center;font-family:var(--fd),sans-serif;font-size:15px;letter-spacing:.1em;text-transform:uppercase;">
     <a href="{{ profileHref }}" style="text-decoration:none;">Profile</a>
     <sc-if value="{{ canEdit }}" hint-placeholder-val="{{ false }}"><a href="{{ editHref }}" style="text-decoration:none;">Edit plaques</a></sc-if>
@@ -36,7 +36,7 @@ a{color:#e8e9ec;text-decoration:none}a:hover{color:oklch(0.82 0.13 85)}
 
       <div style="position:relative;min-height:200px;display:flex;justify-content:space-between;align-items:center;gap:24px;padding:0 32px 0 224px;background:linear-gradient(90deg,rgba(13,15,18,0) 0%,rgba(13,15,18,0) 20%,rgba(13,15,18,.35) 55%,rgba(13,15,18,.75) 100%),{{ emblemBg }};">
         <div style="display:flex;flex-direction:column;gap:8px;">
-          <span style="font-family:var(--fd),sans-serif;font-weight:700;font-size:88px;line-height:.85;text-transform:uppercase;letter-spacing:.01em;text-shadow:0 2px 12px rgba(0,0,0,.7);">{{ displayName }}</span>
+          <span style="font-family:var(--fd),sans-serif;font-weight:700;font-size:{{ nameSize }};line-height:.9;text-transform:uppercase;letter-spacing:.01em;overflow-wrap:anywhere;text-shadow:0 2px 12px rgba(0,0,0,.7);">{{ displayName }}</span>
           <div style="display:flex;gap:28px;flex-wrap:wrap;text-shadow:0 1px 6px rgba(0,0,0,.8);">
             <sc-for list="{{ headerStats }}" as="hs" hint-placeholder-count="3">
               <div style="display:flex;align-items:baseline;gap:8px;">
@@ -112,6 +112,7 @@ a{color:#e8e9ec;text-decoration:none}a:hover{color:oklch(0.82 0.13 85)}
           <input value="{{ emFilter }}" onChange="{{ setEmFilter }}" placeholder="Filter emblems" style="font-family:var(--fm),monospace;font-size:13px;color:#e8e9ec;background:#111418;border:1px solid #2a2f37;padding:8px 10px;outline:none;width:200px;">
         </sc-if>
         <span style="font-family:var(--fm),monospace;font-size:12px;color:#8a8f98;">{{ emStatus }}</span>
+        <sc-if value="{{ sessionExpired }}" hint-placeholder-val="{{ false }}"><button onClick="{{ signIn }}" style="font-family:var(--fd),sans-serif;font-weight:600;font-size:13px;letter-spacing:.14em;text-transform:uppercase;padding:8px 14px;background:oklch(0.82 0.13 85);color:#0d0f12;border:0;cursor:pointer;">Sign in again</button></sc-if>
       </div>
     </div>
     <sc-if value="{{ isChars }}" hint-placeholder-val="{{ true }}">
@@ -136,7 +137,7 @@ a{color:#e8e9ec;text-decoration:none}a:hover{color:oklch(0.82 0.13 85)}
     <span data-tip-title="1" style="font-family:var(--fd),sans-serif;font-weight:700;font-size:15px;letter-spacing:.12em;text-transform:uppercase;color:oklch(0.86 0.12 85);"></span>
     <span data-tip-body="1" style="font-family:var(--fm),monospace;font-size:12px;line-height:1.6;color:#c9ccd2;white-space:pre-line;"></span>
   </div>
-  <sc-if value="{{ hasPlayerRaw }}" hint-placeholder-val="{{ false }}"><div style="display:none;"><dc-import name="Guardian Landing" font="{{ font }}" player="{{ playerRaw }}" hint-size="0,0"></dc-import></div></sc-if>
+  <sc-if value="{{ hasPlayerRaw }}" hint-placeholder-val="{{ false }}"><div style="display:none;"><dc-import name="profile" font="{{ font }}" player="{{ playerRaw }}" hint-size="0,0"></dc-import></div></sc-if>
 </div>
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1480,&quot;height&quot;:990},&quot;player&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;holo&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;min&quot;:0,&quot;max&quot;:1,&quot;step&quot;:0.05,&quot;default&quot;:0.55,&quot;tsType&quot;:&quot;number&quot;},&quot;tilt&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;min&quot;:0,&quot;max&quot;:20,&quot;step&quot;:1,&quot;default&quot;:10,&quot;unit&quot;:&quot;°&quot;,&quot;tsType&quot;:&quot;number&quot;},&quot;idle&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;},&quot;tierPreview&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;auto&quot;,&quot;C&quot;,&quot;R&quot;,&quot;SR&quot;,&quot;UR&quot;,&quot;SPR&quot;],&quot;default&quot;:&quot;auto&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;font&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;barlow&quot;,&quot;space&quot;],&quot;default&quot;:&quot;space&quot;,&quot;tsType&quot;:&quot;'barlow'|'space'&quot;}}">
@@ -218,14 +219,17 @@ class Component extends DCLogic {
   }
   async pickEmblem(path, label) {
     if (!path || !this.P) return;
+    if (!GL.auth()) { this.setState({ emStatus: GL.expired() ? 'Session expired — sign in again to save' : 'Sign in to save' }); return; }
     this.setState({ emblemOverride: path, emStatus: 'Saving…' });
     try {
       const id = this.P.id;
       let d = await GL.loadEdits(id);
       if (!d) { try { d = JSON.parse(localStorage.getItem(GL.k(id, 'profile'))); } catch (e) {} }
-      if (!d) { const base = await fetch('./profile.json').then(r => r.json()); d = id === GL.OWNER ? base : GL.blank(base); }
+      if (!d) d = GL.blank();
       d.profile = { ...(d.profile || {}), cardEmblem: path };
       localStorage.setItem(GL.k(id, 'profile'), JSON.stringify(d));
+      try { const ck = GL.k(id, 'card'); const cc = JSON.parse(localStorage.getItem(ck) || '{}'); cc.emblem = path; localStorage.setItem(ck, JSON.stringify(cc)); } catch (e) {}
+      window.dispatchEvent(new StorageEvent('storage', { key: GL.k(id, 'profile') }));
       const shared = await GL.saveEdits(id, d);
       this.setState({ emStatus: (label ? label + ' · ' : '') + (shared ? 'saved for everyone' : 'saved in this browser') });
     } catch (e) { this.setState({ emStatus: e.message }); }
@@ -233,8 +237,10 @@ class Component extends DCLogic {
   async pickCollectible(ee) {
     this.setState({ emStatus: 'Loading ' + ee.name + '…' });
     const d = await GL.api(`/Destiny2/Manifest/DestinyInventoryItemDefinition/${ee.item}/`).catch(() => null);
-    const path = d && (d.secondaryIcon || d.secondarySpecial);
+    const path = d && d.secondaryIcon;
     if (!path) return this.setState({ emStatus: 'No banner art for ' + ee.name });
+    const okImg = await new Promise(res => { const im = new Image(); im.onload = () => res(im.naturalWidth > 0); im.onerror = () => res(false); im.src = 'https://www.bungie.net' + path; });
+    if (!okImg) return this.setState({ emStatus: 'Banner art failed to load for ' + ee.name });
     this.pickEmblem(path, ee.name);
   }
   applyFont() { document.body.dataset.font = this.props.font ?? 'space'; }
@@ -320,14 +326,15 @@ class Component extends DCLogic {
       exportLabel: this.state.exporting || 'Export PNG',
       font: this.props.font ?? 'space',
       power: (c && c.power) || '✦—',
-      displayName: c && c.name ? c.name : this.state.noPlayer ? 'Find a Guardian' : 'Loading…',
+      nameSize: (n => n <= 9 ? '88px' : Math.max(36, Math.floor(800 / n)) + 'px')(((c && c.name) || (this.state.noPlayer ? 'Find Your Guardian' : '')).length),
+      displayName: c && c.name ? c.name : this.state.noPlayer ? 'Find Your Guardian' : 'Loading…',
       emblemBg: curEmblem ? `#15181c url('https://www.bungie.net${curEmblem}') left center / cover no-repeat` : '#15181c',
       raidShort: ((c && c.raidUrl) || '').replace('https://', ''),
       playerRaw: this.state.playerRaw || '',
       platformLine: this.P && window.GL ? ' · ' + ((GL.PLAT[this.P.type] || {}).label || 'Bungie') + (c && c.code ? ' · ' + c.name + '#' + c.code : '') : '',
-      profileHref: this.P && window.GL ? GL.landing(this.P) : './Guardian Search.dc.html',
-      editHref: './Profile Data Editor.dc.html' + (this.P && window.GL ? GL.qs(this.P) : ''),
-      canEdit: !!(this.P && window.GL && this.state.auth && GL.isOwner(this.P)),
+      profileHref: this.P && window.GL ? GL.landing(this.P) : './search.html',
+      editHref: './edit.html' + (this.P && window.GL ? GL.qs(this.P) : ''),
+      canEdit: !!(this.P && window.GL && GL.isOwner(this.P)),
       showSignIn: !!(this.P && window.GL && !this.state.auth && GL.canLogin()),
       signIn: () => window.GL && GL.login(location.href),
       raidUrl: window.GL ? GL.reportUrl('raid', this.P) : '#',
@@ -353,6 +360,7 @@ class Component extends DCLogic {
         };
       })(),
       hasPlayerRaw: !!this.state.playerRaw,
+      sessionExpired: !!(window.GL && this.P && GL.isOwner(this.P) && !GL.auth()),
       emTabs: [['chars', 'Characters'], ['coll', 'Collections']].map(([k, label]) => ({ label, bg: this.state.emTab === k ? 'oklch(0.82 0.13 85)' : 'transparent', color: this.state.emTab === k ? '#0d0f12' : '#8a8f98', select: () => { this.setState({ emTab: k }); if (k === 'coll' && !this.state.coll) this.loadCollections(); } })),
       isChars: this.state.emTab === 'chars',
       isColl: this.state.emTab === 'coll',

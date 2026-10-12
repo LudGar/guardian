@@ -30,7 +30,7 @@ input::placeholder{color:#6b717b}
   </div>
   <div style="display:flex;flex-direction:column;gap:14px;">
     <div style="font-family:'Space Grotesk',sans-serif;font-size:15px;letter-spacing:.2em;text-transform:uppercase;color:oklch(0.82 0.13 85);">Raids · Dungeons · Exotic missions</div>
-    <h1 style="margin:0;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(48px,8vw,96px);line-height:.9;text-transform:uppercase;letter-spacing:-.01em;">Find a Guardian</h1>
+    <h1 style="margin:0;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(48px,8vw,96px);line-height:.9;text-transform:uppercase;letter-spacing:-.01em;">Find Your Guardian</h1>
     <p style="margin:0;max-width:520px;font-size:17px;line-height:1.5;color:#a9aeb6;text-wrap:pretty;">Search by Bungie Name across PlayStation, Xbox, Steam and Epic. Every profile has a shareable link and share card.</p>
   </div>
   <form onSubmit="{{ submit }}" style="display:flex;gap:0;border:1px solid #2a2f37;">
@@ -54,7 +54,7 @@ input::placeholder{color:#6b717b}
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
   state = { query: '', results: [], status: '', err: false };
-  go(p) { location.href = './Guardian Landing.dc.html' + GL.qs(p); }
+  go(p) { location.href = './profile.html' + GL.qs(p); }
   async run(q) {
     if (!window.GL) return;
     const n = ++this.seq;
@@ -86,7 +86,7 @@ class Component extends DCLogic {
       query: this.state.query,
       status: this.state.status,
       statusColor: this.state.err ? 'oklch(0.64 0.18 25)' : '#8a8f98',
-      results: this.state.results.map(r => ({ ...r, platforms: r.platforms.join(' · '), href: './Guardian Landing.dc.html' + (window.GL ? GL.qs(r) : '') })),
+      results: this.state.results.map(r => ({ ...r, platforms: r.platforms.join(' · '), href: './profile.html' + (window.GL ? GL.qs(r) : '') })),
       onInput: e => { const v = e.target.value; this.setState({ query: v }); clearTimeout(this.t); this.t = setTimeout(() => this.run(v.trim()), 300); },
       submit: async e => {
         e.preventDefault();

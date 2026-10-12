@@ -50,7 +50,7 @@ a{color:#e8e9ec;text-decoration:none}a:hover{color:oklch(0.82 0.13 85)}
   </sc-if>
 
   <sc-if value="{{ noPlayer }}" hint-placeholder-val="{{ false }}">
-    <a href="./Guardian Search.dc.html" style="align-self:flex-start;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:15px;letter-spacing:.14em;text-transform:uppercase;padding:14px 24px;background:oklch(0.82 0.13 85);color:#0d0f12;">Pick a Guardian first</a>
+    <a href="./search.html" style="align-self:flex-start;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:15px;letter-spacing:.14em;text-transform:uppercase;padding:14px 24px;background:oklch(0.82 0.13 85);color:#0d0f12;">Pick a Guardian first</a>
   </sc-if>
 
   <sc-if value="{{ canEdit }}" hint-placeholder-val="{{ false }}">
@@ -146,12 +146,12 @@ class Component extends DCLogic {
       needLogin: !!this.state.needLogin,
       notOwner: !!this.state.notOwner,
       meName: this.state.auth ? this.state.auth.name : '',
-      meHref: this.state.auth && this.state.auth.me && window.GL ? GL.landing(this.state.auth.me) : './Guardian Search.dc.html',
+      meHref: this.state.auth && this.state.auth.me && window.GL ? GL.landing(this.state.auth.me) : './search.html',
       signIn: () => GL.login(location.href),
       raidUrl: window.GL && this.P ? GL.reportUrl('raid', this.P) : 'https://raid.report',
       dungeonUrl: window.GL && this.P ? GL.reportUrl('dungeon', this.P) : 'https://dungeon.report',
       who: this.state.noPlayer ? 'search' : 'profile',
-      backHref: this.state.noPlayer ? './Guardian Search.dc.html' : './Guardian Landing.dc.html' + q,
+      backHref: this.state.noPlayer ? './search.html' : './profile.html' + q,
       status: this.state.status,
       statusColor: this.state.dirty ? gold : '#8a8f98',
       fullRaidClears: (d.profile && d.profile.fullRaidClears) ?? '',

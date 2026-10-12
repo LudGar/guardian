@@ -86,7 +86,7 @@ window.GL = (() => {
     location.href = 'https://www.bungie.net/en/OAuth/Authorize?client_id=' + encodeURIComponent(BUNGIE_CLIENT_ID) + '&response_type=code&state=' + state;
   }
   function logout() { localStorage.removeItem(AUTH); }
-  const landing = p => './Guardian Landing.dc.html' + qs(p);
+  const landing = p => './profile.html' + qs(p);
   const ready = (async () => {
     const q = new URLSearchParams(location.search);
     const code = q.get('code'), state = q.get('state');
@@ -111,7 +111,7 @@ window.GL = (() => {
       const ret = sessionStorage.getItem('gl-oauth-return') || 'me';
       sessionStorage.removeItem('gl-oauth-return');
       const a = auth();
-      location.replace(ret === 'me' ? (a && a.me ? landing(a.me) : './Guardian Search.dc.html') : ret);
+      location.replace(ret === 'me' ? (a && a.me ? landing(a.me) : './search.html') : ret);
     } catch (e) {
       console.warn('Sign-in:', e.message);
       history.replaceState(null, '', location.pathname);

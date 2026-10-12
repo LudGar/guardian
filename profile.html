@@ -19,7 +19,7 @@ a{color:#e8e9ec;text-decoration:none}a:hover{color:oklch(0.82 0.13 85)}
 </helmet>
 <div style="min-height:100vh;background:#0d0f12;">
   <header style="max-width:1200px;margin:0 auto;padding:28px 32px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;">
-    <a href="./Guardian Search.dc.html" style="font-family:var(--fm),monospace;font-size:12px;letter-spacing:.14em;color:#8a8f98;text-transform:uppercase;">← Search · {{ platformLine }}</a>
+    <a href="./search.html" style="font-family:var(--fm),monospace;font-size:12px;letter-spacing:.14em;color:#8a8f98;text-transform:uppercase;">← Search · {{ platformLine }}</a>
     <nav style="display:flex;gap:24px;flex-wrap:wrap;font-family:var(--fd),sans-serif;font-size:15px;letter-spacing:.1em;text-transform:uppercase;">
       <a href="#characters">Characters</a>
       <a href="#plaques">Plaques</a>
@@ -35,8 +35,8 @@ a{color:#e8e9ec;text-decoration:none}a:hover{color:oklch(0.82 0.13 85)}
   <sc-if value="{{ noPlayer }}" hint-placeholder-val="{{ false }}">
     <section style="max-width:1200px;margin:0 auto;padding:120px 32px;display:flex;flex-direction:column;align-items:flex-start;gap:20px;">
       <div style="font-family:var(--fd),sans-serif;font-size:15px;letter-spacing:.2em;text-transform:uppercase;color:oklch(0.82 0.13 85);">{{ emptyKicker }}</div>
-      <h1 style="margin:0;font-family:var(--fd),sans-serif;font-weight:700;font-size:clamp(48px,8vw,96px);line-height:.9;text-transform:uppercase;">Find a Guardian</h1>
-      <a href="./Guardian Search.dc.html" style="font-family:var(--fd),sans-serif;font-weight:600;font-size:16px;letter-spacing:.14em;text-transform:uppercase;padding:14px 24px;background:oklch(0.82 0.13 85);color:#0d0f12;">Search by Bungie Name</a>
+      <h1 style="margin:0;font-family:var(--fd),sans-serif;font-weight:700;font-size:clamp(48px,8vw,96px);line-height:.9;text-transform:uppercase;">Find Your Guardian</h1>
+      <a href="./search.html" style="font-family:var(--fd),sans-serif;font-weight:600;font-size:16px;letter-spacing:.14em;text-transform:uppercase;padding:14px 24px;background:oklch(0.82 0.13 85);color:#0d0f12;">Search by Bungie Name</a>
     </section>
   </sc-if>
   <sc-if value="{{ hasPlayer }}" hint-placeholder-val="{{ true }}">
@@ -45,7 +45,7 @@ a{color:#e8e9ec;text-decoration:none}a:hover{color:oklch(0.82 0.13 85)}
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:40px;align-items:end;">
       <div style="display:flex;flex-direction:column;gap:12px;">
         <div style="font-family:var(--fd),sans-serif;font-size:15px;letter-spacing:.2em;text-transform:uppercase;color:oklch(0.82 0.13 85);">Raids · Dungeons · Exotic missions</div>
-        <h1 style="margin:0;font-family:var(--fd),sans-serif;font-weight:700;font-size:clamp(64px,11vw,136px);line-height:.88;letter-spacing:-.01em;text-transform:uppercase;">{{ displayName }}</h1>
+        <h1 style="margin:0;font-family:var(--fd),sans-serif;font-weight:700;font-size:{{ nameSize }};line-height:.88;letter-spacing:-.01em;text-transform:uppercase;overflow-wrap:anywhere;max-width:100%;">{{ displayName }}</h1>
       </div>
       <div style="display:flex;flex-direction:column;gap:20px;">
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
@@ -477,13 +477,14 @@ class Component extends DCLogic {
       hasPlayer: !this.state.noPlayer,
       emptyKicker: this.state.notFound ? 'Guardian not found' : 'No Guardian selected',
       displayName,
+      nameSize: (n => n <= 9 ? 'clamp(64px,11vw,136px)' : `min(136px, 11vw, ${Math.floor(1220 / n)}px, calc((100vw - 64px) / ${(n * 0.62).toFixed(2)}))`)((displayName || '').length),
       platformLine: pl && G ? ((G.PLAT[pl.type] || {}).label || 'Bungie') + (L && L.code ? ' · ' + L.name + '#' + L.code : '') : '',
       emblemBg: emblemPath ? `#15181c url('https://www.bungie.net${emblemPath}') center / cover no-repeat` : '#15181c',
-      editHref: './Profile Data Editor.dc.html' + q,
+      editHref: './edit.html' + q,
       canEdit: !!(G && pl && G.isOwner(pl)),
       showSignIn: !!(G && pl && !this.state.auth && G.canLogin()),
       signIn: () => G && G.login(location.href),
-      cardHref: './Guardian Share Card.dc.html' + q,
+      cardHref: './share_card.html' + q,
       raidUrl, dungeonUrl,
       reportLinks: [{ label: 'Raid Report', site: 'raid.report', href: raidUrl }, { label: 'Dungeon Report', site: 'dungeon.report', href: dungeonUrl }],
       pgcrUrl: pl ? `https://pgcr.report/@${pl.id}/${pl.type}` : 'https://pgcr.report',
