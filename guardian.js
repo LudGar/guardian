@@ -39,10 +39,16 @@ window.GL = (() => {
       return { name: x.bungieGlobalDisplayName, code: String(x.bungieGlobalDisplayNameCode).padStart(4, '0'), type: m.membershipType, id: m.membershipId, platforms: [...new Set(x.destinyMemberships.map(d => (PLAT[d.membershipType] || {}).label).filter(Boolean))] };
     });
   }
-  const blank = base => ({
-    raids: base.raids.map(r => [r[0], 0, [], '', 0]),
-    dungeons: base.dungeons.map(r => [r[0], 0, [], '', 0]),
-    missions: base.missions.map(r => [r[0], 0, [], '', 0]),
+  // Activity list, newest first. Add new raids/dungeons/missions here.
+  const ACTIVITIES = {
+    raids: ["The Desert Perpetual", "Salvation's Edge", "Crota's End", "Root of Nightmares", "King's Fall", "Vow of the Disciple", "Vault of Glass", "Deep Stone Crypt", "Garden of Salvation", "Last Wish", "Pantheon", "Crown of Sorrow", "Scourge of the Past", "Spire of Stars", "Eater of Worlds", "Leviathan"],
+    dungeons: ["Equilibrium", "Sundered Doctrine", "Vesper's Host", "Warlord's Ruin", "Ghosts of the Deep", "Spire of the Watcher", "Duality", "Grasp of Avarice", "Prophecy", "Pit of Heresy", "Shattered Throne"],
+    missions: ["Kell's Fall", "Encore", "Starcrossed", "Avalon", "Seraph's Shield", "Vox Obscura", "Presage", "Harbinger", "Zero Hour", "The Whisper"]
+  };
+  const blank = () => ({
+    raids: ACTIVITIES.raids.map(n => [n, 0, [], '', 0]),
+    dungeons: ACTIVITIES.dungeons.map(n => [n, 0, [], '', 0]),
+    missions: ACTIVITIES.missions.map(n => [n, 0, [], '', 0]),
     profile: {}
   });
   const k = (id, s) => 'gl-' + s + '-' + id;
@@ -134,5 +140,5 @@ window.GL = (() => {
     if (!r.ok) throw new Error(r.status === 403 ? 'Not your Guardian' : 'Save failed (' + r.status + ')');
     return true;
   }
-  return { register, auth, stored, expired, isOwner, canLogin, login, logout, ready, hasDb, loadEdits, saveEdits, landing, KEY, OWNER, get, api, post, PLAT, parse, fromUrl, resolve, search, blank, k, qs, reportUrl };
+  return { register, auth, stored, expired, isOwner, canLogin, login, logout, ready, hasDb, loadEdits, saveEdits, landing, KEY, OWNER, get, api, post, PLAT, parse, fromUrl, resolve, search, blank, ACTIVITIES, k, qs, reportUrl };
 })();
